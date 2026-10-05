@@ -14,7 +14,7 @@ npm run build --prefix frontend
 node deploy/generar-nginx.cjs
 ```
 
-El generador escribe `deploy/runtime/nginx.conf` con la ruta absoluta de TU carpeta, incluso si tiene espacios. Esa carpeta y los logs no se suben a GitHub. El ejemplo Linux está en `deploy/nginx.conf.example`.
+El generador escribe `deploy/runtime/nginx.conf` con la ruta absoluta de TU carpeta, incluso si tiene espacios. También crea las carpetas de logs y archivos temporales que nginx necesita en Windows. Esa carpeta y los logs no se suben a GitHub. El ejemplo Linux está en `deploy/nginx.conf.example`.
 
 Antes de iniciar PM2, ejecutar el backend actualizado en desarrollo al menos una vez: el índice único que evita reservas simultáneas debe existir en PostgreSQL. El modo de producción no sincroniza el esquema automáticamente. En un servidor nuevo, preparar el esquema con una ejecución de desarrollo y luego detenerla; no habilitar sincronización automática permanente en producción.
 

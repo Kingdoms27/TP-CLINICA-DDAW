@@ -2,7 +2,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const output = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, 'runtime');
-fs.mkdirSync(path.join(output, 'logs'), {recursive: true});
+for (const directory of ['logs', 'temp/client_body_temp', 'temp/proxy_temp', 'temp/fastcgi_temp', 'temp/uwsgi_temp', 'temp/scgi_temp']) {
+  fs.mkdirSync(path.join(output, directory), {recursive: true});
+}
 const web = path.join(root, 'frontend', 'dist', 'frontend', 'browser').replaceAll('\\', '/');
 const config = `worker_processes 1;
 error_log logs/error.log;
