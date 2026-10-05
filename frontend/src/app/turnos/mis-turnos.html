@@ -16,7 +16,7 @@
       >Actualizar
     </button>
     <a class="primary" routerLink="/paciente/reservar"
-      ><span aria-hidden="true">＋</span>Reservar turno</a
+      ><span aria-hidden="true">+</span>Reservar turno</a
     >
   </div>
 </div>
@@ -143,7 +143,7 @@
     </div>
   } @else if (turnos().length === 0) {
     <div class="message empty-state">
-      <span class="empty-symbol" aria-hidden="true">＋</span>
+      <span class="empty-symbol" aria-hidden="true">+</span>
       <h2>Todavía no tenés turnos</h2>
       <p>Tus reservas aparecerán acá. Elegí una consulta para empezar.</p>
       <a class="primary" routerLink="/paciente/reservar"
@@ -175,13 +175,15 @@
                 >
               </td>
               <td class="doctor-cell">
-                <span class="doctor-avatar" aria-hidden="true"
-                  >{{ turno.medico.nombres.slice(0, 1)
-                  }}{{ turno.medico.apellidos.slice(0, 1) }}</span
-                >
-                <div>
-                  <strong>{{ turno.medico.nombres }} {{ turno.medico.apellidos }}</strong
-                  ><span class="secondary">Matrícula {{ turno.medico.matricula }}</span>
+                <div class="doctor-identity">
+                  <span class="doctor-avatar" aria-hidden="true"
+                    >{{ turno.medico.nombres.slice(0, 1)
+                    }}{{ turno.medico.apellidos.slice(0, 1) }}</span
+                  >
+                  <div>
+                    <strong>{{ turno.medico.nombres }} {{ turno.medico.apellidos }}</strong
+                    ><span class="secondary">Matrícula {{ turno.medico.matricula }}</span>
+                  </div>
                 </div>
               </td>
               <td class="price-cell" data-label="Valor reservado">

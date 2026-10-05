@@ -71,3 +71,6 @@ app-mis-turnos [tabindex]:focus-visible {
 }
 app-mis-turnos [tabindex]:focus:not(:focus-visible) { outline: none; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+app-mis-turnos .loading { display: flex; align-items: center; gap: 12px; color: #76618e; }
+app-mis-turnos .loading-dot { width: 7px; height: 7px; background: #a895be; border-radius: 50%; animation: loading-pulse 1.4s ease-in-out infinite alternate; }

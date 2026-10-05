@@ -16,7 +16,7 @@ const previews = join(__dirname, 'runtime', 'previews');
   try {
     await mkdir(previews, {recursive: true});
     for (const [nombre, width, height] of [['escritorio',1440,900], ['notebook',1366,768], ['tablet',820,1180], ['movil',390,844], ['movil-pequeno',320,720]]) {
-      const context = await browser.newContext({viewport: {width, height}, isMobile: width <= 700, hasTouch: width <= 700});
+      const context = await browser.newContext({viewport: {width, height}, locale: 'es-AR', isMobile: width <= 700, hasTouch: width <= 700});
       await context.addInitScript(s => sessionStorage.setItem('clinica.sesion', JSON.stringify(s)), sesion);
       const page = await context.newPage();
       const errors = [];
@@ -50,7 +50,7 @@ const previews = join(__dirname, 'runtime', 'previews');
       console.log(`Paciente aprobado en ${nombre}: ${width}×${height}, resumen, turnos, scroll, navegación y reserva. Los 18 turnos de presentación son datos de prueba del navegador.`);
       await context.close();
     }
-    const context = await browser.newContext({viewport: {width: 390, height: 844}, isMobile: true, hasTouch: true, reducedMotion: 'reduce'});
+    const context = await browser.newContext({viewport: {width: 390, height: 844}, locale: 'es-AR', isMobile: true, hasTouch: true, reducedMotion: 'reduce'});
     await context.addInitScript(s => sessionStorage.setItem('clinica.sesion', JSON.stringify(s)), sesion);
     const page = await context.newPage();
     await page.goto(`${base}/paciente/reservar`);

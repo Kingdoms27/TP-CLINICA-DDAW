@@ -52,7 +52,7 @@ tbody tr:last-child td { border-bottom: 0; }
 tbody tr { transition: background .2s; }
 tbody tr:hover { background: #fff5; }
 .secondary { display: block; color: #85798f; font-size: 10px; margin-top: 6px; font-weight: 400; }
-.doctor-cell { display: flex; align-items: center; gap: 10px; }
+.doctor-identity { display: flex; align-items: center; gap: 10px; }
 .doctor-avatar { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid #c5b3d84d; border-radius: 11px; color: #8e75a4; background: #e4dcef; font-size: 9px; text-transform: uppercase; }
 .price-cell { white-space: nowrap; font-weight: 500; }
 .state { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; background: #e8e4ed; color: #807588; border: 1px solid #92859d12; border-radius: 20px; font-size: 9px; white-space: nowrap; }
@@ -69,8 +69,6 @@ tbody tr:hover { background: #fff5; }
 .message.error { color: #984a66; border-color: #c69ba9; background: #f5eaf0; }
 .error button { margin-top: 15px; }
 .success { color: #4d7b62; background: #e5efe9; border-color: #aacabb; }
-.loading { display: flex; align-items: center; gap: 12px; color: #76618e; }
-.loading-dot { width: 7px; height: 7px; background: #a895be; border-radius: 50%; animation: loading-pulse 1.4s ease-in-out infinite alternate; }
 .empty-state { text-align: center; padding: 40px 24px; }
 .empty-symbol { display: inline-grid; place-items: center; width: 48px; height: 48px; border-radius: 16px; background: #e1d8ed; color: #9980b1; margin-bottom: 18px; font-size: 25px; }
 .empty-state p { color: #82728f; font-size: 12px; }
