@@ -2,7 +2,7 @@
 .area-page { min-height: 100vh; padding: 32px; background: radial-gradient(circle at 85% 0, #253240, #090d12 55%); }
 .area-container { max-width: 1180px; margin: auto; }
 .area-header { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 14px 0 34px; color: #f1ede5; }
-.area-brand { font-weight: 700; letter-spacing: .12em; white-space: nowrap; }
+.area-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .12em; white-space: nowrap; }
 .session-details { display: flex; align-items: center; gap: 16px; font-size: 13px; }
 .role-badge { padding: 6px 12px; border: 1px solid #ffffff26; border-radius: 20px; color: #c9d5e1; }
 button { padding: 10px 16px; background: #ffffff12; border: 1px solid #ffffff26; border-radius: 10px; color: #f1ede5; cursor: pointer; }

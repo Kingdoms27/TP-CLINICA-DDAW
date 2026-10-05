@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -16,6 +17,7 @@ export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
   readonly sesionVencida = inject(ActivatedRoute).snapshot.queryParamMap.get('sesion') === 'vencida';
   readonly cargando = signal(false);
   readonly error = signal('');
@@ -25,6 +27,12 @@ export class Login {
 
   alternarClave() {
     this.mostrarClave = !this.mostrarClave;
+  }
+
+  irASeccion(seccion: HTMLElement) {
+    const reducirMovimiento = this.document.defaultView?.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    seccion.scrollIntoView({behavior: reducirMovimiento ? 'instant' : 'smooth', block: 'start'});
+    seccion.focus({preventScroll: true});
   }
 
   iniciarSesion(form: NgForm) {
