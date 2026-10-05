@@ -1,5 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, DOCUMENT } from '@angular/common';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, Injector, signal, viewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize, forkJoin } from 'rxjs';
@@ -12,6 +12,9 @@ import { GestionService, PacienteResumen, TurnoGestion } from './gestion.service
 export class Administrador {
   private readonly servicio=inject(GestionService);
   private readonly destroyRef=inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
+  private readonly confirmacion = viewChild<ElementRef<HTMLElement>>('confirmacion');
   readonly vista=signal<'turnos'|'reservar'|'precios'>('turnos');
   readonly turnos=signal<TurnoGestion[]>([]);
   readonly medicos=signal<MedicoDisponible[]>([]);
@@ -54,13 +57,24 @@ export class Administrador {
   puedeCancelar(turno:TurnoGestion): boolean {
     return turno.estado==='ACTIVO'&&new Date(turno.fechaHora).getTime()>Date.now();
   }
+  seleccionarCancelacion(turno: TurnoGestion): void {
+    if (this.guardando()) return;
+    this.seleccion.set(turno);
+    afterNextRender(() => {
+      const panel = this.confirmacion()?.nativeElement;
+      const reducir = this.document.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      panel?.scrollIntoView?.({behavior: reducir ? 'instant' : 'smooth', block: 'start'});
+      panel?.focus({preventScroll: true});
+    }, {injector: this.injector});
+  }
+
   cancelar():void {
     const turno=this.seleccion();if(!turno||this.guardando()) return;
     if(!this.puedeCancelar(turno)){this.error.set('No se puede cancelar un turno que ya comenzó.');this.seleccion.set(null);return;}
     this.guardando.set(true);this.error.set('');
     this.servicio.estado(turno.id,'cancelar-admin').pipe(takeUntilDestroyed(this.destroyRef),finalize(()=>this.guardando.set(false)))
       .subscribe({next:actualizada=>{
-        this.turnos.update(items=>items.map(item=>item.id===turno.id?{...item,...actualizada}:item));
+        this.turnos.update(items=>items.map(item=>item.id===turno.id?{...item,...actualizada,paciente:{...item.paciente,...actualizada.paciente}}:item));
         this.seleccion.set(null);this.mensaje.set('El turno se canceló correctamente.');
       },error:error=>this.error.set(mensajeApi(error,'No se pudo cancelar el turno.'))});
   }

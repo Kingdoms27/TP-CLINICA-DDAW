@@ -1,7 +1,5 @@
-<main class="area-page" [class.patient-area]="auth.sesion()?.usuario?.rol === 'PACIENTE'">
-  @if (auth.sesion()?.usuario?.rol === 'PACIENTE') {
-    <div class="area-ambient" aria-hidden="true"><span></span><span></span></div>
-  }
+<main class="area-page clinic-area">
+  <div class="area-ambient" aria-hidden="true"><span></span><span></span></div>
   <div class="area-container">
     <header class="area-header">
       <a class="area-brand" [routerLink]="auth.rutaInicio()"
@@ -35,12 +33,21 @@
         >
         <span>Tu espacio de salud</span>
       </nav>
+    } @else {
+      <div class="workspace-strip">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="16" rx="3" />
+          <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" />
+        </svg>
+        <strong>{{
+          auth.sesion()?.usuario?.rol === 'MEDICO' ? 'Agenda médica' : 'Administración'
+        }}</strong
+        ><span>Un espacio para organizar la atención</span>
+      </div>
     }
     <section class="area-content"><router-outlet /></section>
-    @if (auth.sesion()?.usuario?.rol === 'PACIENTE') {
-      <footer class="area-footer">
-        <span>CLÍNICA · Un espacio para cuidar</span><span>Turnos · Agenda · Gestión</span>
-      </footer>
-    }
+    <footer class="area-footer">
+      <span>CLÍNICA · Un espacio para cuidar</span><span>Turnos · Agenda · Gestión</span>
+    </footer>
   </div>
 </main>

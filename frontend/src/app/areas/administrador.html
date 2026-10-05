@@ -1,22 +1,406 @@
-<p class="eyebrow">ÁREA ADMINISTRADOR</p><h1>Gestión de la clínica</h1><p class="description">Administrá las reservas de los pacientes y los valores de consulta de cada médico.</p>
-<nav class="tabs" aria-label="Secciones de administración"><button type="button" [class.active]="vista()==='turnos'" (click)="cambiarVista('turnos')" [disabled]="guardando()">Turnos</button><button type="button" [class.active]="vista()==='reservar'" (click)="cambiarVista('reservar')" [disabled]="guardando()">Reservar</button><button type="button" [class.active]="vista()==='precios'" (click)="cambiarVista('precios')" [disabled]="guardando()">Valores de consulta</button></nav>
-@if(error()){<div class="message error" role="alert">{{ error() }} @if(!medicos().length){<button type="button" (click)="cargar()" [disabled]="cargando()">Reintentar</button>}</div>}
-@if(mensaje()){<p class="message success" role="status">{{ mensaje() }}</p>}
-@if(cargando()){<p class="message" role="status">Cargando datos de la clínica…</p>}
-@else {
-  @if(vista()==='turnos'){
-    <div class="toolbar"><label for="filtro-fecha">Filtrar por fecha<input id="filtro-fecha" type="date" [(ngModel)]="filtroFecha" /></label><label for="busqueda">Paciente, DNI o médico<input id="busqueda" type="search" [(ngModel)]="busqueda" placeholder="Buscar…" /></label><button type="button" (click)="cargar()" [disabled]="guardando()">Actualizar</button></div>
-    <p class="hint">Como administrador, podés cancelar un turno activo hasta antes del inicio de la consulta.</p>
-    @if(seleccion();as turno){<section class="confirmation" aria-label="Confirmar cancelación"><h2>¿Cancelar este turno?</h2><p>{{ turno.paciente.nombres }} {{ turno.paciente.apellidos }} · {{ turno.fechaHora | date:'dd/MM/yyyy HH:mm':'-0300' }} hs.</p><div class="actions"><button type="button" class="danger" (click)="cancelar()" [disabled]="guardando()">{{ guardando()?'Cancelando…':'Confirmar cancelación' }}</button><button type="button" class="secondary" (click)="seleccion.set(null)" [disabled]="guardando()">Conservar turno</button></div></section>}
-    @if(turnosFiltrados.length){<div class="table-container"><table><caption class="sr-only">Turnos reservados de la clínica</caption><thead><tr><th>Fecha y hora</th><th>Paciente</th><th>Médico</th><th>Valor reservado</th><th>Estado</th><th>Acción</th></tr></thead><tbody>@for(turno of turnosFiltrados;track turno.id){<tr><td>{{ turno.fechaHora | date:'dd/MM/yyyy HH:mm':'-0300' }}</td><td>{{ turno.paciente.nombres }} {{ turno.paciente.apellidos }}<small>DNI {{ turno.paciente.documento }}</small></td><td>{{ turno.medico?.nombres }} {{ turno.medico?.apellidos }}</td><td>{{ turno.valorConsulta | currency:'ARS':'code':'1.0-0' }}</td><td>{{ turno.estado }}</td><td>@if(puedeCancelar(turno)){<button type="button" class="secondary" (click)="seleccion.set(turno)" [disabled]="guardando()">Cancelar</button>}@else{—}</td></tr>}</tbody></table></div>}@else{<p class="message">No hay turnos para los filtros seleccionados.</p>}
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">TODO CONECTADO</p>
+    <h1>Gestión de la clínica<span>.</span></h1>
+    <p class="description">
+      Reservas, profesionales y valores de consulta. Una atención mejor organizada.
+    </p>
+  </div>
+  <span class="heading-tag">ADMINISTRACIÓN</span>
+</div>
+@if (!cargando() && medicos().length) {
+  <section class="overview-grid" aria-label="Resumen de la clínica">
+    <article class="overview-card">
+      <span class="overview-icon"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="16" rx="3" />
+          <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" /></svg
+      ></span>
+      <div>
+        <span>Reservas registradas</span><strong>{{ turnos().length }}</strong>
+      </div>
+    </article>
+    <article class="overview-card">
+      <span class="overview-icon blue"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="3" width="14" height="18" rx="3" />
+          <path d="M9 7h6m-3 5v6m-3-3h6" /></svg
+      ></span>
+      <div>
+        <span>Profesionales</span><strong>{{ medicos().length }}</strong>
+      </div>
+    </article>
+    <article class="overview-card">
+      <span class="overview-icon neutral"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg
+      ></span>
+      <div>
+        <span>Pacientes activos</span><strong>{{ pacientes().length }}</strong>
+      </div>
+    </article>
+  </section>
+}
+<nav class="tabs" aria-label="Secciones de administración">
+  <button
+    type="button"
+    [class.active]="vista() === 'turnos'"
+    [attr.aria-pressed]="vista() === 'turnos'"
+    (click)="cambiarVista('turnos')"
+    [disabled]="guardando()"
+  >
+    Turnos</button
+  ><button
+    type="button"
+    [class.active]="vista() === 'reservar'"
+    [attr.aria-pressed]="vista() === 'reservar'"
+    (click)="cambiarVista('reservar')"
+    [disabled]="guardando()"
+  >
+    Reservar</button
+  ><button
+    type="button"
+    [class.active]="vista() === 'precios'"
+    [attr.aria-pressed]="vista() === 'precios'"
+    (click)="cambiarVista('precios')"
+    [disabled]="guardando()"
+  >
+    Valores de consulta
+  </button>
+</nav>
+@if (error()) {
+  <div class="message error" role="alert">
+    {{ error() }}
+    @if (!medicos().length) {
+      <button type="button" (click)="cargar()" [disabled]="cargando()">Reintentar</button>
+    }
+  </div>
+}
+@if (mensaje()) {
+  <p class="message success" role="status">{{ mensaje() }}</p>
+}
+@if (cargando()) {
+  <p class="message loading" role="status">Cargando datos de la clínica…</p>
+} @else {
+  @if (vista() === 'turnos') {
+    <div class="section-heading">
+      <div>
+        <h2>Reservas de la clínica</h2>
+        <p>Encontrá una consulta por fecha, paciente o profesional.</p>
+      </div>
+      <span class="heading-tag">{{ turnosFiltrados.length }} RESULTADOS</span>
+    </div>
+    <div class="toolbar filter-card">
+      <label for="filtro-fecha"
+        >Filtrar por fecha<input id="filtro-fecha" type="date" [(ngModel)]="filtroFecha" /></label
+      ><label class="search-field" for="busqueda"
+        >Paciente, DNI o médico<input
+          id="busqueda"
+          type="search"
+          [(ngModel)]="busqueda"
+          placeholder="Buscar una consulta…" /></label
+      ><button type="button" (click)="cargar()" [disabled]="guardando()">Actualizar</button>
+    </div>
+    @if (seleccion(); as turno) {
+      <section #confirmacion class="confirmation" tabindex="-1" aria-label="Confirmar cancelación">
+        <div>
+          <span class="eyebrow">REVISÁ ANTES DE CONFIRMAR</span>
+          <h2>¿Cancelar este turno?</h2>
+          <p>
+            {{ turno.paciente.nombres }} {{ turno.paciente.apellidos }} ·
+            {{ turno.fechaHora | date: 'dd/MM/yyyy HH:mm' : '-0300' }} hs.
+          </p>
+        </div>
+        <div class="actions">
+          <button type="button" class="danger" (click)="cancelar()" [disabled]="guardando()">
+            {{ guardando() ? 'Cancelando…' : 'Confirmar cancelación' }}</button
+          ><button
+            type="button"
+            class="secondary"
+            (click)="seleccion.set(null)"
+            [disabled]="guardando()"
+          >
+            Conservar turno
+          </button>
+        </div>
+      </section>
+    }
+    @if (turnosFiltrados.length) {
+      <div class="table-container">
+        <table>
+          <caption class="sr-only">
+            Turnos reservados de la clínica
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Paciente</th>
+              <th scope="col">Profesional</th>
+              <th scope="col">Fecha y hora</th>
+              <th scope="col">Valor reservado</th>
+              <th scope="col">Estado</th>
+              <th scope="col"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (turno of turnosFiltrados; track turno.id) {
+              <tr [attr.data-turno-id]="turno.id">
+                <td class="identity-cell" data-label="Paciente">
+                  <div class="person">
+                    <span class="avatar" aria-hidden="true"
+                      >{{ turno.paciente.nombres.slice(0, 1)
+                      }}{{ turno.paciente.apellidos.slice(0, 1) }}</span
+                    >
+                    <div>
+                      <strong>{{ turno.paciente.nombres }} {{ turno.paciente.apellidos }}</strong
+                      ><small>DNI {{ turno.paciente.documento }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="identity-cell" data-label="Profesional">
+                  <strong>{{ turno.medico?.nombres }} {{ turno.medico?.apellidos }}</strong>
+                </td>
+                <td data-label="Fecha y hora">
+                  <strong>{{ turno.fechaHora | date: 'dd/MM/yyyy' : '-0300' }}</strong
+                  ><small>{{ turno.fechaHora | date: 'HH:mm' : '-0300' }} hs</small>
+                </td>
+                <td class="value-cell" data-label="Valor reservado">
+                  {{ turno.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}
+                </td>
+                <td>
+                  <span
+                    class="badge"
+                    [class.reserved]="turno.estado === 'ACTIVO'"
+                    [class.attended]="turno.estado === 'ATENDIDO'"
+                    [class.absent]="turno.estado === 'AUSENTE'"
+                    ><span aria-hidden="true"></span
+                    >{{
+                      turno.estado === 'ACTIVO'
+                        ? 'Reservado'
+                        : turno.estado === 'ATENDIDO'
+                          ? 'Atendido'
+                          : turno.estado === 'AUSENTE'
+                            ? 'Ausente'
+                            : 'Cancelado'
+                    }}</span
+                  >
+                </td>
+                <td class="action-cell">
+                  @if (puedeCancelar(turno)) {
+                    <button
+                      type="button"
+                      class="secondary small-button"
+                      (click)="seleccionarCancelacion(turno)"
+                      [disabled]="guardando()"
+                      [attr.aria-label]="
+                        'Cancelar turno de ' +
+                        turno.paciente.nombres +
+                        ' ' +
+                        turno.paciente.apellidos
+                      "
+                    >
+                      Cancelar
+                    </button>
+                  } @else {
+                    <span class="muted">Sin acciones</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="message empty-state">
+        <h2>No encontramos consultas.</h2>
+        <p>No hay turnos para los filtros seleccionados. Probá otra fecha o búsqueda.</p>
+      </div>
+    }
+    <section class="guidance-grid" aria-label="Información de administración">
+      <article class="guidance-card">
+        <span>01</span>
+        <div>
+          <h3>Si cambia el plan.</h3>
+          <p>
+            Como administrador, podés cancelar un turno activo hasta antes del inicio de la
+            consulta. Revisá la reserva antes de confirmar.
+          </p>
+        </div>
+      </article>
+      <article class="guidance-card">
+        <span>02</span>
+        <div>
+          <h3>Un valor que se respeta.</h3>
+          <p>
+            Cada reserva conserva el precio confirmado. Los cambios de valores se aplican a las
+            nuevas consultas.
+          </p>
+        </div>
+      </article>
+    </section>
   }
-  @if(vista()==='reservar'){
-    @if(reservaConfirmada();as reserva){<section class="message success" role="status"><h2>Reserva confirmada</h2><p>{{ reserva.fechaHora | date:'dd/MM/yyyy HH:mm':'-0300' }} hs · Valor reservado: {{ reserva.valorConsulta | currency:'ARS':'code':'1.0-0' }}</p><button type="button" (click)="cambiarVista('turnos')">Ver turnos</button></section>}
-    @else if(!pacientes().length||!medicos().length){<p class="message">Para reservar se necesita al menos un paciente activo y un médico disponible.</p>}
-    @else{<form class="card" #formReserva="ngForm" (ngSubmit)="reservar(formReserva)"><fieldset [disabled]="guardando()"><legend class="sr-only">Nueva reserva para un paciente</legend><div class="form-grid"><label for="paciente-admin">Paciente<select id="paciente-admin" name="paciente" [(ngModel)]="idPaciente" required><option [ngValue]="null" disabled>Seleccioná un paciente</option>@for(paciente of pacientes();track paciente.id){<option [ngValue]="paciente.id">{{ paciente.apellidos }}, {{ paciente.nombres }} · DNI {{ paciente.documento }}</option>}</select></label><label for="medico-admin">Médico<select id="medico-admin" name="medico" [(ngModel)]="idMedico" required><option [ngValue]="null" disabled>Seleccioná un médico</option>@for(medico of medicos();track medico.id){<option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }}</option>}</select></label><label for="fecha-admin">Fecha<input id="fecha-admin" name="fecha" type="date" [(ngModel)]="fecha" (ngModelChange)="hora=''" [min]="hoy" [max]="limite" required /></label><label for="hora-admin">Hora<select id="hora-admin" name="hora" [(ngModel)]="hora" required><option value="" disabled>Seleccioná un horario</option>@for(horario of horariosDisponibles;track horario){<option [value]="horario">{{ horario }} hs</option>}</select></label></div><p class="hint">Horarios de Argentina. Turnos de una hora, de 08:00 a 15:00, hasta 30 días de anticipación. La disponibilidad se confirma al reservar.</p>@if(medicoSeleccionado;as medico){<p>Valor actual: <strong>{{ medico.valorConsulta | currency:'ARS':'code':'1.0-0' }}</strong>. El backend fija el valor definitivo al confirmar.</p>}<button type="submit" [disabled]="guardando()">{{ guardando()?'Reservando…':'Confirmar reserva' }}</button></fieldset></form>}
+  @if (vista() === 'reservar') {
+    <div class="section-heading">
+      <div>
+        <h2>Una nueva consulta</h2>
+        <p>Reservá una atención para un paciente activo.</p>
+      </div>
+      <span class="heading-tag">RESERVAS</span>
+    </div>
+    @if (reservaConfirmada(); as reserva) {
+      <section class="message success" role="status">
+        <h2>Reserva confirmada</h2>
+        <p>
+          {{ reserva.fechaHora | date: 'dd/MM/yyyy HH:mm' : '-0300' }} hs · Valor reservado:
+          {{ reserva.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}
+        </p>
+        <button type="button" (click)="cambiarVista('turnos')">Ver turnos</button>
+      </section>
+    } @else if (!pacientes().length || !medicos().length) {
+      <p class="message">
+        Para reservar se necesita al menos un paciente activo y un médico disponible.
+      </p>
+    } @else {
+      <div class="booking-layout">
+        <form class="card" #formReserva="ngForm" (ngSubmit)="reservar(formReserva)">
+          <fieldset [disabled]="guardando()">
+            <legend class="sr-only">Nueva reserva para un paciente</legend>
+            <div class="form-grid">
+              <label for="paciente-admin"
+                >Paciente<select
+                  id="paciente-admin"
+                  name="paciente"
+                  [(ngModel)]="idPaciente"
+                  required
+                >
+                  <option [ngValue]="null" disabled>Seleccioná un paciente</option>
+                  @for (paciente of pacientes(); track paciente.id) {
+                    <option [ngValue]="paciente.id">
+                      {{ paciente.apellidos }}, {{ paciente.nombres }} · DNI
+                      {{ paciente.documento }}
+                    </option>
+                  }
+                </select></label
+              ><label for="medico-admin"
+                >Profesional<select id="medico-admin" name="medico" [(ngModel)]="idMedico" required>
+                  <option [ngValue]="null" disabled>Seleccioná un médico</option>
+                  @for (medico of medicos(); track medico.id) {
+                    <option [ngValue]="medico.id">
+                      {{ medico.nombres }} {{ medico.apellidos }}
+                    </option>
+                  }
+                </select></label
+              ><label for="fecha-admin"
+                >Fecha<input
+                  id="fecha-admin"
+                  name="fecha"
+                  type="date"
+                  [(ngModel)]="fecha"
+                  (ngModelChange)="hora = ''"
+                  [min]="hoy"
+                  [max]="limite"
+                  required /></label
+              ><label for="hora-admin"
+                >Hora<select id="hora-admin" name="hora" [(ngModel)]="hora" required>
+                  <option value="" disabled>Seleccioná un horario</option>
+                  @for (horario of horariosDisponibles; track horario) {
+                    <option [value]="horario">{{ horario }} hs</option>
+                  }
+                </select></label
+              >
+            </div>
+            @if (medicoSeleccionado; as medico) {
+              <div class="price-preview">
+                <span>Valor actual de la consulta</span
+                ><strong>{{ medico.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}</strong
+                ><small>El valor definitivo se confirma al reservar.</small>
+              </div>
+            }
+            <button class="wide-button" type="submit" [disabled]="guardando()">
+              {{ guardando() ? 'Reservando…' : 'Confirmar reserva' }}
+            </button>
+          </fieldset>
+        </form>
+        <aside class="booking-guide">
+          <span class="eyebrow">CADA COSA, EN SU LUGAR</span>
+          <h2>Una reserva.<br />Todo organizado.</h2>
+          <p>Elegí al paciente, el profesional y el horario de su próxima atención.</p>
+          <ol>
+            <li><span>01</span>Solo pacientes activos y médicos disponibles.</li>
+            <li><span>02</span>Turnos de una hora, con inicio de 08:00 a 15:00.</li>
+            <li>
+              <span>03</span>Hasta 30 días de anticipación. La disponibilidad se confirma al
+              reservar.
+            </li>
+          </ol>
+          <p class="guide-note">Horarios de Argentina.</p>
+        </aside>
+      </div>
+    }
   }
-  @if(vista()==='precios'){
-    <p class="hint">Los nuevos valores se aplican a futuras reservas. Los turnos existentes conservan su importe.</p>
-    <div class="table-container"><table><caption class="sr-only">Valores de consulta de los médicos</caption><thead><tr><th>Médico</th><th>Matrícula</th><th>Valor actual</th><th>Nuevo valor en ARS</th><th>Acción</th></tr></thead><tbody>@for(medico of medicos();track medico.id){<tr><td>{{ medico.nombres }} {{ medico.apellidos }}</td><td>{{ medico.matricula }}</td><td>{{ medico.valorConsulta | currency:'ARS':'code':'1.0-0' }}</td><td><input class="price-input" type="number" min="1" step="1" [attr.aria-label]="'Nuevo valor para '+medico.nombres+' '+medico.apellidos" [(ngModel)]="valores[medico.id]" [disabled]="guardando()" /></td><td><button type="button" (click)="actualizarPrecio(medico)" [disabled]="guardando()">Guardar</button></td></tr>}</tbody></table></div>
+  @if (vista() === 'precios') {
+    <div class="section-heading">
+      <div>
+        <h2>Valores de consulta</h2>
+        <p>Actualizá el valor de la atención de cada profesional.</p>
+      </div>
+      <span class="heading-tag">IMPORTES EN ARS</span>
+    </div>
+    <div class="price-note">
+      <span aria-hidden="true">◇</span>
+      <p>
+        Los nuevos valores se aplican a futuras reservas.
+        <strong>Los turnos existentes conservan su importe.</strong>
+      </p>
+    </div>
+    <div class="table-container">
+      <table class="prices-table">
+        <caption class="sr-only">
+          Valores de consulta de los médicos
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Profesional</th>
+            <th scope="col">Matrícula</th>
+            <th scope="col">Valor actual</th>
+            <th scope="col">Nuevo valor en ARS</th>
+            <th scope="col"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (medico of medicos(); track medico.id) {
+            <tr [attr.data-medico-id]="medico.id">
+              <td class="identity-cell" data-label="Profesional">
+                <div class="person">
+                  <span class="avatar" aria-hidden="true"
+                    >{{ medico.nombres.slice(0, 1) }}{{ medico.apellidos.slice(0, 1) }}</span
+                  ><strong>{{ medico.nombres }} {{ medico.apellidos }}</strong>
+                </div>
+              </td>
+              <td data-label="Matrícula">{{ medico.matricula }}</td>
+              <td class="value-cell" data-label="Valor actual">
+                {{ medico.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}
+              </td>
+              <td class="price-edit-cell" data-label="Nuevo valor en ARS">
+                <input
+                  class="price-input"
+                  type="number"
+                  min="1"
+                  step="1"
+                  [attr.aria-label]="'Nuevo valor para ' + medico.nombres + ' ' + medico.apellidos"
+                  [(ngModel)]="valores[medico.id]"
+                  [disabled]="guardando()"
+                />
+              </td>
+              <td class="price-save-cell action-cell">
+                <button type="button" (click)="actualizarPrecio(medico)" [disabled]="guardando()">
+                  Guardar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 }
