@@ -11,6 +11,7 @@ import {
   Between,
   Not,
   Repository,
+  QueryFailedError,
 } from 'typeorm';
 
 import { Reserva } from './entities/reserva.entity';
@@ -211,10 +212,15 @@ export class ReservasService {
           medico.valorConsulta,
       });
 
-    const reservaGuardada =
-      await this.reservaRepository.save(
-        reserva,
-      );
+    let reservaGuardada: Reserva;
+    try {
+      reservaGuardada = await this.reservaRepository.save(reserva);
+    } catch (error) {
+      if (error instanceof QueryFailedError && (error.driverError as {code?: string}).code === '23505') {
+        throw new BadRequestException('El médico ya tiene un turno reservado en ese horario');
+      }
+      throw error;
+    }
 
     return {
       id:
@@ -374,9 +380,7 @@ export class ReservasService {
       EstadoReserva.CANCELADO;
 
     const reservaActualizada =
-      await this.reservaRepository.save(
-        reserva,
-      );
+      await this.guardarEstado(reserva);
 
     return {
       id:
@@ -560,9 +564,7 @@ export class ReservasService {
       EstadoReserva.ATENDIDO;
 
     const reservaActualizada =
-      await this.reservaRepository.save(
-        reserva,
-      );
+      await this.guardarEstado(reserva);
 
     return {
       id:
@@ -649,9 +651,7 @@ export class ReservasService {
       EstadoReserva.AUSENTE;
 
     const reservaActualizada =
-      await this.reservaRepository.save(
-        reserva,
-      );
+      await this.guardarEstado(reserva);
 
     return {
       id:
@@ -792,9 +792,7 @@ export class ReservasService {
       EstadoReserva.CANCELADO;
 
     const reservaActualizada =
-      await this.reservaRepository.save(
-        reserva,
-      );
+      await this.guardarEstado(reserva);
 
     return {
       id:
@@ -835,4 +833,15 @@ export class ReservasService {
       },
     };
   }
+
+  private async guardarEstado(reserva: Reserva) {
+    const resultado = await this.reservaRepository.update(
+      {id: reserva.id, estado: EstadoReserva.ACTIVO}, {estado: reserva.estado},
+    );
+    if (resultado.affected !== 1) {
+      throw new BadRequestException('El turno ya fue modificado. Actualizá la lista e intentá nuevamente');
+    }
+    return reserva;
+  }
+
 }

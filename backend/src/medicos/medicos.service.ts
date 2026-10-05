@@ -74,28 +74,11 @@ export class MedicosService {
       );
 
     return {
-      id:
-        medicoActualizado.id,
-
-      matricula:
-        medicoActualizado.matricula,
-
-      valorConsulta:
-        medicoActualizado.valorConsulta,
-
-      usuario: {
-        id:
-          medico.usuario.id,
-
-        nombres:
-          medico.usuario.nombres,
-
-        apellidos:
-          medico.usuario.apellidos,
-
-        email:
-          medico.usuario.email,
-      },
+      id: medicoActualizado.id,
+      matricula: medicoActualizado.matricula,
+      valorConsulta: medicoActualizado.valorConsulta,
+      nombres: medico.usuario.nombres,
+      apellidos: medico.usuario.apellidos,
     };
   }
 }

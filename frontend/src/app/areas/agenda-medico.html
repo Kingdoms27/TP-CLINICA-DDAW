@@ -1,0 +1,13 @@
+<p class="eyebrow">ÁREA MÉDICO</p><h1>Mi agenda</h1>
+<p class="description">Consultá tus turnos por fecha y registrá si el paciente fue atendido o estuvo ausente.</p>
+<form class="toolbar" (ngSubmit)="cargar()"><label for="fecha-agenda">Fecha<input id="fecha-agenda" name="fecha" type="date" [(ngModel)]="fecha" required [disabled]="cargando() || guardando()" /></label><button type="submit" [disabled]="cargando() || guardando()">Consultar agenda</button></form>
+@if (error()) {<p class="message error" role="alert">{{ error() }}</p>}
+@if (mensaje()) {<p class="message success" role="status">{{ mensaje() }}</p>}
+@if (seleccion(); as seleccionada) {
+  <section class="confirmation" aria-label="Confirmar estado"><h2>¿Marcar como {{ seleccionada.accion }}?</h2><p>{{ seleccionada.turno.paciente.nombres }} {{ seleccionada.turno.paciente.apellidos }} · {{ seleccionada.turno.fechaHora | date:'HH:mm':'-0300' }} hs.</p><div class="actions"><button type="button" (click)="confirmar()" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Confirmar' }}</button><button type="button" class="secondary" (click)="seleccion.set(null)" [disabled]="guardando()">Volver</button></div></section>
+}
+@if (cargando()) {<p class="message" role="status">Cargando agenda…</p>}
+@else if (!error() && !turnos().length) {<p class="message">No tenés turnos para esta fecha.</p>}
+@else if (turnos().length) {
+  <div class="table-container"><table><caption class="sr-only">Turnos de la fecha seleccionada</caption><thead><tr><th>Hora</th><th>Paciente</th><th>Consulta</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>@for(turno of turnos(); track turno.id) {<tr><td>{{ turno.fechaHora | date:'HH:mm':'-0300' }} hs</td><td>{{ turno.paciente.nombres }} {{ turno.paciente.apellidos }}<small>DNI {{ turno.paciente.documento }}</small></td><td>{{ turno.valorConsulta | currency:'ARS':'code':'1.0-0' }}</td><td><span class="badge">{{ turno.estado === 'ACTIVO' ? 'Reservado' : turno.estado === 'ATENDIDO' ? 'Atendido' : 'Ausente' }}</span></td><td>@if(turno.estado === 'ACTIVO') {<div class="actions"><button type="button" (click)="seleccion.set({turno, accion:'atendido'})" [disabled]="guardando()">Atendido</button><button type="button" class="secondary" (click)="seleccion.set({turno, accion:'ausente'})" [disabled]="guardando()">Ausente</button></div>} @else {—}</td></tr>}</tbody></table></div>
+}

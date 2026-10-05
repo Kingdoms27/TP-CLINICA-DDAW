@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -11,6 +12,7 @@ import { EstadoReserva } from '../../common/enums/estado-reserva.enum';
 import { Medico } from '../../medicos/entities/medico.entity';
 import { Usuario } from '../../usuarios/entities/usuario.entity';
 
+@Index('reserva_medico_horario_ocupado', ['medico', 'fechaHora'], {unique: true, where: "estado <> 'CANCELADO'"})
 @Entity('reservas')
 export class Reserva {
   @PrimaryGeneratedColumn()

@@ -39,7 +39,7 @@ import { AuthModule } from './auth/auth.module';
 
         autoLoadEntities: true,
 
-        synchronize: true,
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true' || (configService.get<string>('DB_SYNCHRONIZE') !== 'false' && process.env.NODE_ENV !== 'production'),
       }),
     }),
 

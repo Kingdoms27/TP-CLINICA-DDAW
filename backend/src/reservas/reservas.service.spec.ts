@@ -9,7 +9,7 @@ import { EstadoReserva } from '../common/enums/estado-reserva.enum';
 
 describe('Reservas y cancelaciones de paciente', () => {
   let service: ReservasService;
-  const reservas = {findOne: jest.fn(), create: jest.fn(), save: jest.fn()};
+  const reservas = {findOne: jest.fn(), create: jest.fn(), save: jest.fn(), update: jest.fn()};
   const medicos = {findOne: jest.fn()};
   const usuarios = {findOne: jest.fn()};
   const paciente = {id: 3, rol: RolUsuario.PACIENTE, estado: EstadoUsuario.ACTIVO, nombres: 'Carlos', apellidos: 'Lopez'};
@@ -21,6 +21,7 @@ describe('Reservas y cancelaciones de paciente', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-10-05T10:00:00-03:00'));
     jest.clearAllMocks();
     reservas.findOne.mockResolvedValue(null);
+    reservas.update.mockResolvedValue({affected: 1});
     reservas.create.mockImplementation((value) => value);
     reservas.save.mockImplementation(async (value) => ({...value,id:12}));
     medicos.findOne.mockResolvedValue(medico);
