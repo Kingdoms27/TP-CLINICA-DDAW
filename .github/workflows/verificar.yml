@@ -46,3 +46,24 @@ jobs:
         working-directory: frontend
       - run: npm run docs
         working-directory: frontend
+      - name: Preparar nginx y PM2
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y nginx
+          npm run seed --prefix backend
+          npm run pm2:start --prefix backend
+          node deploy/generar-nginx.cjs
+          nginx -p "${{ github.workspace }}/deploy/runtime/" -c nginx.conf -t
+          nginx -p "${{ github.workspace }}/deploy/runtime/" -c nginx.conf
+      - name: Probar el stack servido por nginx
+        run: |
+          for i in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/api/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node deploy/probar-stack.cjs
+      - name: Detener procesos de prueba
+        if: always()
+        run: |
+          nginx -p "${{ github.workspace }}/deploy/runtime/" -c nginx.conf -s quit || true
+          npm run pm2:stop --prefix backend || true
