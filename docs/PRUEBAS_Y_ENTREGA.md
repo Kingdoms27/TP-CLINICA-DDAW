@@ -66,7 +66,7 @@ Remove-Item Env:DB_SYNCHRONIZE
 
 Nunca usar `clinica` para las pruebas e2e. El script se niega a arrancar si el nombre no termina en `_test`. Crea usuarios propios y elimina solo sus registros de prueba al terminar. No hay que ejecutar el seed en esa base.
 
-GitHub Actions ejecuta compilación, pruebas unitarias, e2e con PostgreSQL 18, generación de Compodoc y una prueba del conjunto servido mediante nginx + PM2. También verifica el login en Chrome en cinco tamaños, movimiento reducido, contraseña visible, error recuperable, ingreso y cierre de sesión; guarda las capturas en el artefacto `vistas-login`. El resultado del workflow debe comprobarse en la pestaña Actions del repositorio.
+GitHub Actions ejecuta compilación, pruebas unitarias, e2e con PostgreSQL 18, generación de Compodoc y una prueba del conjunto servido mediante nginx + PM2. También verifica el login en Chrome en cinco tamaños, movimiento reducido, contraseña visible, error recuperable, ingreso y cierre de sesión; comprueba el área del paciente, su versión móvil y una reserva y cancelación reales; guarda las capturas en el artefacto `vistas-clinica`. El resultado del workflow debe comprobarse en la pestaña Actions del repositorio.
 
 ## Documentación
 

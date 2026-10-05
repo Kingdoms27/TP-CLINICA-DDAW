@@ -1,5 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, DOCUMENT } from '@angular/common';
+import { afterNextRender, Component, computed, DestroyRef, ElementRef, inject, Injector, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { RouterLink } from '@angular/router';
@@ -16,7 +16,17 @@ import { puedeCancelarTurno } from './fechas-clinica';
 export class MisTurnos {
   private readonly servicio = inject(TurnosService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
+  private readonly confirmacion = viewChild<ElementRef<HTMLElement>>('confirmacion');
   readonly turnos = signal<TurnoPaciente[]>([]);
+  readonly proximosTurnos = computed(() => {
+    const ahora = Date.now();
+    return this.turnos().filter(t => t.estado === 'ACTIVO' && new Date(t.fechaHora).getTime() > ahora)
+      .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime());
+  });
+  readonly proximoTurno = computed(() => this.proximosTurnos()[0] ?? null);
+  readonly atendidos = computed(() => this.turnos().filter(t => t.estado === 'ATENDIDO').length);
   readonly cargando = signal(false);
   readonly error = signal('');
   readonly seleccion = signal<TurnoPaciente | null>(null);
@@ -47,6 +57,16 @@ export class MisTurnos {
     this.errorCancelacion.set('');
     this.mensaje.set('');
     this.seleccion.set(turno);
+    afterNextRender(() => {
+      const panel = this.confirmacion()?.nativeElement;
+      if (panel) this.irASeccion(panel);
+    }, {injector: this.injector});
+  }
+
+  irASeccion(seccion: HTMLElement): void {
+    const reducirMovimiento = this.document.defaultView?.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    seccion.scrollIntoView?.({behavior: reducirMovimiento ? 'instant' : 'smooth', block: 'start'});
+    seccion.focus({preventScroll: true});
   }
 
   confirmarCancelacion(): void {

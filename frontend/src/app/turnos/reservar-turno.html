@@ -1,41 +1,131 @@
-<a class="back" routerLink="/paciente">← Mis turnos</a>
-<p class="eyebrow">ÁREA PACIENTE</p>
-<h1>Reservar turno</h1>
-<p class="description">Elegí un médico, una fecha y un horario. Las consultas duran una hora y se abonan de forma particular.</p>
-@if (reserva(); as creada) {
-  <div class="success" role="status">
-    <h2>Tu turno quedó reservado</h2>
-    <p>{{ creada.fechaHora | date:'dd/MM/yyyy':'-0300' }} a las {{ creada.fechaHora | date:'HH:mm':'-0300' }} hs.</p>
-    <p>Valor reservado: <strong>{{ creada.valorConsulta | currency:'ARS':'code':'1.0-0' }}</strong></p>
-    <a class="primary" routerLink="/paciente">Ver mis turnos</a>
-  </div>
-} @else if (cargando()) {
-  <p class="message" role="status">Cargando médicos…</p>
-} @else if (errorMedicos()) {
-  <div class="message error" role="alert"><p>{{ errorMedicos() }}</p><button type="button" (click)="cargarMedicos()">Reintentar</button></div>
-} @else if (!medicos().length) {
-  <p class="message">No hay médicos disponibles para reservar en este momento.</p>
-} @else {
-  <form #reservaForm="ngForm" (ngSubmit)="reservar(reservaForm)">
-    <fieldset [disabled]="guardando()">
-      <legend class="sr-only">Datos del turno</legend>
-      <label for="medico">Médico</label>
-      <select id="medico" name="medico" [(ngModel)]="idMedico" required>
-        <option [ngValue]="null" disabled>Seleccioná un médico</option>
-        @for (medico of medicos(); track medico.id) {
-          <option [ngValue]="medico.id">{{ medico.nombres }} {{ medico.apellidos }} · Matrícula {{ medico.matricula }}</option>
-        }
-      </select>
-      <div class="fields-row">
-        <div><label for="fecha">Fecha</label><input id="fecha" name="fecha" type="date" [(ngModel)]="fecha" (ngModelChange)="hora = ''" [min]="hoy" [max]="fechaLimite" required /></div>
-        <div><label for="hora">Hora</label><select id="hora" name="hora" [(ngModel)]="hora" required><option value="" disabled>Seleccioná un horario</option>@for (horario of horariosDisponibles; track horario) {<option [value]="horario">{{ horario }} hs</option>}</select></div>
+<div class="reservation-heading">
+  <a class="back" routerLink="/paciente">← Mis turnos</a>
+  <p class="eyebrow">ÁREA PACIENTE</p>
+  <h1>Reservar turno</h1>
+  <p class="description">
+    Elegí un médico, una fecha y un horario. Las consultas duran una hora y se abonan de forma
+    particular.
+  </p>
+</div>
+<div class="reservation-layout">
+  <section class="reservation-form" aria-label="Formulario de reserva">
+    @if (reserva(); as creada) {
+      <div class="success" role="status">
+        <h2>Tu turno quedó reservado</h2>
+        <p>
+          {{ creada.fechaHora | date: 'dd/MM/yyyy' : '-0300' }} a las
+          {{ creada.fechaHora | date: 'HH:mm' : '-0300' }} hs.
+        </p>
+        <p>
+          Valor reservado:
+          <strong>{{ creada.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}</strong>
+        </p>
+        <a class="primary" routerLink="/paciente">Ver mis turnos</a>
       </div>
-      <p class="hint">Horarios de la clínica: Argentina. Atención de 08:00 a 16:00, con último turno a las 15:00. El horario elegido se confirma al reservar.</p>
-      @if (medicoSeleccionado; as medico) {
-        <div class="price"><span>Valor actual de la consulta</span><strong>{{ medico.valorConsulta | currency:'ARS':'code':'1.0-0' }}</strong><small>El valor definitivo queda fijado cuando se confirma la reserva.</small></div>
-      }
-      @if (error()) {<p class="error" role="alert">{{ error() }}</p>}
-      <button type="submit" class="primary" [disabled]="guardando()" [attr.aria-busy]="guardando()">{{ guardando() ? 'Reservando…' : 'Confirmar reserva' }}</button>
-    </fieldset>
-  </form>
-}
+    } @else if (cargando()) {
+      <p class="message" role="status">Cargando médicos…</p>
+    } @else if (errorMedicos()) {
+      <div class="message error" role="alert">
+        <p>{{ errorMedicos() }}</p>
+        <button type="button" (click)="cargarMedicos()">Reintentar</button>
+      </div>
+    } @else if (!medicos().length) {
+      <p class="message">No hay médicos disponibles para reservar en este momento.</p>
+    } @else {
+      <form #reservaForm="ngForm" (ngSubmit)="reservar(reservaForm)">
+        <fieldset [disabled]="guardando()">
+          <legend class="sr-only">Datos del turno</legend>
+          <label for="medico">Médico</label>
+          <select id="medico" name="medico" [(ngModel)]="idMedico" required>
+            <option [ngValue]="null" disabled>Seleccioná un médico</option>
+            @for (medico of medicos(); track medico.id) {
+              <option [ngValue]="medico.id">
+                {{ medico.nombres }} {{ medico.apellidos }} · Matrícula {{ medico.matricula }}
+              </option>
+            }
+          </select>
+          <div class="fields-row">
+            <div>
+              <label for="fecha">Fecha</label
+              ><input
+                id="fecha"
+                name="fecha"
+                type="date"
+                [(ngModel)]="fecha"
+                (ngModelChange)="hora = ''"
+                [min]="hoy"
+                [max]="fechaLimite"
+                required
+              />
+            </div>
+            <div>
+              <label for="hora">Hora</label
+              ><select id="hora" name="hora" [(ngModel)]="hora" required>
+                <option value="" disabled>Seleccioná un horario</option>
+                @for (horario of horariosDisponibles; track horario) {
+                  <option [value]="horario">{{ horario }} hs</option>
+                }
+              </select>
+            </div>
+          </div>
+          <p class="hint">
+            Horarios de la clínica: Argentina. Atención de 08:00 a 16:00, con último turno a las
+            15:00. El horario elegido se confirma al reservar.
+          </p>
+          @if (medicoSeleccionado; as medico) {
+            <div class="price">
+              <span>Valor actual de la consulta</span
+              ><strong>{{ medico.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}</strong
+              ><small>El valor definitivo queda fijado cuando se confirma la reserva.</small>
+            </div>
+          }
+          @if (error()) {
+            <p class="error" role="alert">{{ error() }}</p>
+          }
+          <button
+            type="submit"
+            class="primary"
+            [disabled]="guardando()"
+            [attr.aria-busy]="guardando()"
+          >
+            {{ guardando() ? 'Reservando…' : 'Confirmar reserva' }}
+          </button>
+        </fieldset>
+      </form>
+    }
+  </section>
+  <aside class="reservation-guide" aria-labelledby="guia-reserva">
+    <span class="guide-symbol"
+      ><svg viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="5" width="16" height="16" rx="3" />
+        <path d="M8 3v4m8-4v4M4 11h16m-10 5 2 2 4-4" /></svg
+    ></span>
+    <span class="eyebrow">UN MOMENTO PARA VOS</span>
+    <h2 id="guia-reserva">Cuidarte empieza<br />con una consulta.</h2>
+    <p>Reservar es simple. Elegí el profesional y encontrá un horario para tu atención.</p>
+    <ol>
+      <li>
+        <span>01</span>
+        <div>
+          <strong>Elegí tu profesional</strong>
+          <p>Consultá los médicos disponibles y su valor de consulta.</p>
+        </div>
+      </li>
+      <li>
+        <span>02</span>
+        <div>
+          <strong>Buscá tu momento</strong>
+          <p>Elegí una fecha y un horario futuro, hasta 30 días de anticipación.</p>
+        </div>
+      </li>
+      <li>
+        <span>03</span>
+        <div>
+          <strong>Confirmá tu reserva</strong>
+          <p>El horario se confirma al reservar y el precio queda fijado.</p>
+        </div>
+      </li>
+    </ol>
+    <div class="guide-footer">Una hora para tu atención.<br />Horarios de Argentina.</div>
+  </aside>
+</div>

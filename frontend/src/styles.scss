@@ -60,3 +60,14 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+@keyframes patient-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes row-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes loading-pulse { to { opacity: .35; } }
+app-mis-turnos button:focus-visible, app-mis-turnos a:focus-visible,
+app-mis-turnos [tabindex]:focus-visible {
+  outline: 2px solid #9e82bb;
+  outline-offset: 4px;
+}
+app-mis-turnos [tabindex]:focus:not(:focus-visible) { outline: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

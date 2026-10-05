@@ -1,46 +1,250 @@
 <div class="heading-row">
-  <div><p class="eyebrow">ÁREA PACIENTE</p><h1>Mis turnos</h1></div>
+  <div>
+    <p class="eyebrow">TU ESPACIO DE SALUD</p>
+    <h1>Mis turnos<span>.</span></h1>
+    <p class="description">Tu atención, mejor organizada. Todas tus consultas en un solo lugar.</p>
+  </div>
   <div class="heading-actions">
-    <button type="button" (click)="cargar()" [disabled]="cargando() || cancelando()">Actualizar</button>
-    <a class="primary" routerLink="/paciente/reservar">Reservar turno</a>
+    <button
+      class="refresh-button"
+      type="button"
+      (click)="cargar()"
+      [disabled]="cargando() || cancelando()"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M20 7v5h-5M4 17v-5h5m-3-5a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1" /></svg
+      >Actualizar
+    </button>
+    <a class="primary" routerLink="/paciente/reservar"
+      ><span aria-hidden="true">＋</span>Reservar turno</a
+    >
   </div>
 </div>
-<p class="description">Consultá tus reservas y el valor de cada consulta al momento de reservar.</p>
-<p class="policy">Podés cancelar un turno reservado hasta el día anterior a la consulta.</p>
-@if (mensaje()) {<p class="message success" role="status">{{ mensaje() }}</p>}
-@if (errorCancelacion()) {<p class="message error" role="alert">{{ errorCancelacion() }}</p>}
-@if (seleccion(); as turno) {
-  <section class="cancel-confirm" aria-label="Confirmar cancelación">
-    <h2>¿Cancelar este turno?</h2>
-    <p>{{ turno.medico.nombres }} {{ turno.medico.apellidos }} · {{ turno.fechaHora | date:'dd/MM/yyyy HH:mm':'-0300' }} hs.</p>
-    <div class="confirmation-actions">
-      <button type="button" class="danger" (click)="confirmarCancelacion()" [disabled]="cancelando()">{{ cancelando() ? 'Cancelando…' : 'Sí, cancelar turno' }}</button>
-      <button type="button" (click)="seleccion.set(null)" [disabled]="cancelando()">Conservar turno</button>
-    </div>
+@if (!cargando() && !error()) {
+  <section class="summary-grid" aria-label="Resumen de tus consultas">
+    <article class="summary-card">
+      <span class="summary-icon"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="16" rx="3" />
+          <path d="M8 3v4m8-4v4M4 11h16m-9 5 2 2 4-4" /></svg
+      ></span>
+      <div>
+        <span>Próximas consultas</span><strong>{{ proximosTurnos().length }}</strong>
+      </div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon blue"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 3 3 5-6" /></svg
+      ></span>
+      <div>
+        <span>Consultas atendidas</span><strong>{{ atendidos() }}</strong>
+      </div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon neutral"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="3" width="14" height="18" rx="3" />
+          <path d="M9 7h6m-6 5h6m-6 5h4" /></svg
+      ></span>
+      <div>
+        <span>Total de reservas</span><strong>{{ turnos().length }}</strong>
+      </div>
+    </article>
   </section>
+  @if (proximoTurno(); as turno) {
+    <section class="next-appointment" aria-labelledby="proxima-consulta">
+      <div class="next-date" aria-hidden="true">
+        <span>{{ turno.fechaHora | date: 'MMM' : '-0300' }}</span
+        ><strong>{{ turno.fechaHora | date: 'dd' : '-0300' }}</strong
+        ><span>{{ turno.fechaHora | date: 'yyyy' : '-0300' }}</span>
+      </div>
+      <div class="next-details">
+        <span class="eyebrow">TU PRÓXIMA CONSULTA</span>
+        <h2 id="proxima-consulta">{{ turno.medico.nombres }} {{ turno.medico.apellidos }}</h2>
+        <p>
+          {{ turno.fechaHora | date: 'dd/MM/yyyy' : '-0300' }} ·
+          {{ turno.fechaHora | date: 'HH:mm' : '-0300' }} hs
+          <span>· Matrícula {{ turno.medico.matricula }}</span>
+        </p>
+      </div>
+      <div class="next-action">
+        <span>Valor reservado</span
+        ><strong>{{ turno.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}</strong
+        ><button type="button" (click)="irASeccion(listado)">
+          Ver mis reservas <span aria-hidden="true">↓</span>
+        </button>
+      </div>
+    </section>
+  } @else {
+    <section class="next-appointment next-empty">
+      <div>
+        <span class="eyebrow">UN MOMENTO PARA VOS</span>
+        <h2>Tu próxima consulta empieza acá.</h2>
+        <p>Cuando reserves un turno futuro, lo vas a encontrar en este espacio.</p>
+      </div>
+      <a routerLink="/paciente/reservar">Elegir una consulta <span aria-hidden="true">↗</span></a>
+    </section>
+  }
 }
-@if (cargando()) {
-  <p class="message" role="status">Cargando tus turnos…</p>
-} @else if (error()) {
-  <div class="message error" role="alert"><p>{{ error() }}</p><button type="button" (click)="cargar()">Reintentar</button></div>
-} @else if (turnos().length === 0) {
-  <div class="message"><h2>Todavía no tenés turnos</h2><p>Tus reservas aparecerán acá.</p></div>
-} @else {
-  <div class="table-container">
-    <table>
-      <caption class="sr-only">Listado de tus turnos</caption>
-      <thead><tr><th scope="col">Fecha y hora</th><th scope="col">Médico</th><th scope="col">Consulta</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
-      <tbody>
-        @for (turno of turnos(); track turno.id) {
-          <tr>
-            <td>{{ turno.fechaHora | date:'dd/MM/yyyy':'-0300' }}<span class="secondary">{{ turno.fechaHora | date:'HH:mm':'-0300' }} hs</span></td>
-            <td>{{ turno.medico.nombres }} {{ turno.medico.apellidos }}<span class="secondary">Matrícula {{ turno.medico.matricula }}</span></td>
-            <td>{{ turno.valorConsulta | currency:'ARS':'code':'1.0-0' }}</td>
-            <td><span class="state" [class.active]="turno.estado === 'ACTIVO'">{{ estados[turno.estado] }}</span></td>
-            <td>@if (puedeCancelar(turno)) {<button type="button" class="cancel-button" (click)="solicitarCancelacion(turno)" [disabled]="cancelando()">Cancelar</button>} @else {<span class="secondary">—</span>}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+<section
+  #listado
+  id="listado-turnos"
+  class="appointments-section"
+  tabindex="-1"
+  aria-labelledby="listado-titulo"
+>
+  <div class="list-heading">
+    <div>
+      <h2 id="listado-titulo">Historial y reservas</h2>
+      <p>Fechas, profesionales y el valor confirmado de cada consulta.</p>
+    </div>
+    <span class="list-label">TUS CONSULTAS</span>
   </div>
-}
+  @if (mensaje()) {
+    <p class="message success" role="status">{{ mensaje() }}</p>
+  }
+  @if (errorCancelacion()) {
+    <p class="message error" role="alert">{{ errorCancelacion() }}</p>
+  }
+  @if (seleccion(); as turno) {
+    <section #confirmacion class="cancel-confirm" tabindex="-1" aria-label="Confirmar cancelación">
+      <div>
+        <span class="eyebrow">REVISÁ ANTES DE CONFIRMAR</span>
+        <h2>¿Cancelar este turno?</h2>
+        <p>
+          {{ turno.medico.nombres }} {{ turno.medico.apellidos }} ·
+          {{ turno.fechaHora | date: 'dd/MM/yyyy HH:mm' : '-0300' }} hs.
+        </p>
+      </div>
+      <div class="confirmation-actions">
+        <button
+          type="button"
+          class="danger"
+          (click)="confirmarCancelacion()"
+          [disabled]="cancelando()"
+        >
+          {{ cancelando() ? 'Cancelando…' : 'Sí, cancelar turno' }}</button
+        ><button type="button" (click)="seleccion.set(null)" [disabled]="cancelando()">
+          Conservar turno
+        </button>
+      </div>
+    </section>
+  }
+  @if (cargando()) {
+    <p class="message loading" role="status">
+      <span class="loading-dot" aria-hidden="true"></span>Cargando tus turnos…
+    </p>
+  } @else if (error()) {
+    <div class="message error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" (click)="cargar()">Reintentar</button>
+    </div>
+  } @else if (turnos().length === 0) {
+    <div class="message empty-state">
+      <span class="empty-symbol" aria-hidden="true">＋</span>
+      <h2>Todavía no tenés turnos</h2>
+      <p>Tus reservas aparecerán acá. Elegí una consulta para empezar.</p>
+      <a class="primary" routerLink="/paciente/reservar"
+        >Reservar mi primer turno <span aria-hidden="true">↗</span></a
+      >
+    </div>
+  } @else {
+    <div class="table-container">
+      <table>
+        <caption class="sr-only">
+          Listado de tus turnos
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Fecha y hora</th>
+            <th scope="col">Profesional</th>
+            <th scope="col">Valor reservado</th>
+            <th scope="col">Estado</th>
+            <th scope="col"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (turno of turnos(); track turno.id) {
+            <tr [attr.data-turno-id]="turno.id">
+              <td class="date-cell" data-label="Fecha y hora">
+                <strong>{{ turno.fechaHora | date: 'dd/MM/yyyy' : '-0300' }}</strong
+                ><span class="secondary"
+                  >{{ turno.fechaHora | date: 'HH:mm' : '-0300' }} hs · Argentina</span
+                >
+              </td>
+              <td class="doctor-cell">
+                <span class="doctor-avatar" aria-hidden="true"
+                  >{{ turno.medico.nombres.slice(0, 1)
+                  }}{{ turno.medico.apellidos.slice(0, 1) }}</span
+                >
+                <div>
+                  <strong>{{ turno.medico.nombres }} {{ turno.medico.apellidos }}</strong
+                  ><span class="secondary">Matrícula {{ turno.medico.matricula }}</span>
+                </div>
+              </td>
+              <td class="price-cell" data-label="Valor reservado">
+                {{ turno.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}
+              </td>
+              <td class="state-cell">
+                <span
+                  class="state"
+                  [class.active]="turno.estado === 'ACTIVO'"
+                  [class.attended]="turno.estado === 'ATENDIDO'"
+                  [class.absent]="turno.estado === 'AUSENTE'"
+                  ><span class="state-dot" aria-hidden="true"></span
+                  >{{ estados[turno.estado] }}</span
+                >
+              </td>
+              <td class="action-cell">
+                @if (puedeCancelar(turno)) {
+                  <button
+                    type="button"
+                    class="cancel-button"
+                    (click)="solicitarCancelacion(turno)"
+                    [disabled]="cancelando()"
+                    [attr.aria-label]="
+                      'Cancelar turno con ' +
+                      turno.medico.nombres +
+                      ' ' +
+                      turno.medico.apellidos +
+                      ' del ' +
+                      (turno.fechaHora | date: 'dd/MM/yyyy HH:mm' : '-0300')
+                    "
+                  >
+                    Cancelar
+                  </button>
+                } @else {
+                  <span class="no-action">Sin acciones</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+<section class="guidance-grid" aria-label="Información sobre tus reservas">
+  <article class="guidance-card">
+    <span class="guidance-number">01</span>
+    <div>
+      <h3>Un cambio de planes.</h3>
+      <p class="policy">
+        Podés cancelar un turno reservado hasta el día anterior a la consulta. Antes de hacerlo, te
+        pediremos confirmación.
+      </p>
+    </div>
+  </article>
+  <article class="guidance-card">
+    <span class="guidance-number">02</span>
+    <div>
+      <h3>Tu valor, confirmado.</h3>
+      <p>
+        El precio queda fijado cuando reservás. Si luego cambia el valor de la consulta, tu reserva
+        mantiene el importe original.
+      </p>
+    </div>
+  </article>
+</section>

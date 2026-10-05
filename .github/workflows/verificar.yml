@@ -62,14 +62,17 @@ jobs:
             sleep 1
           done
           node deploy/probar-stack.cjs
-      - name: Verificar el login en Chrome
+      - name: Verificar el acceso y el área del paciente en Chrome
         run: |
           npm install --prefix "$RUNNER_TEMP/clinica-browser" --no-package-lock --no-save playwright@1.62.1
-          CLINICA_BROWSER_MODULE="$RUNNER_TEMP/clinica-browser/node_modules/playwright" CLINICA_BROWSER_EXECUTABLE="$(command -v google-chrome || command -v google-chrome-stable)" node deploy/probar-login.cjs
+          export CLINICA_BROWSER_MODULE="$RUNNER_TEMP/clinica-browser/node_modules/playwright"
+          export CLINICA_BROWSER_EXECUTABLE="$(command -v google-chrome || command -v google-chrome-stable)"
+          node deploy/probar-login.cjs
+          node deploy/probar-paciente.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: vistas-login
+          name: vistas-clinica
           path: deploy/runtime/previews/
           if-no-files-found: ignore
       - name: Detener procesos de prueba
