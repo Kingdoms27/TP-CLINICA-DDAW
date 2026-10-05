@@ -1,6 +1,10 @@
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { MedicoConsultaDto } from '../common/response-dtos';
+import { ValidatedResponse } from '../common/validate-response';
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -31,12 +35,22 @@ import {
   RolUsuario,
 } from '../common/enums/rol-usuario.enum';
 
+@ApiTags('Médicos')
+@ApiBearerAuth()
 @Controller('medicos')
 export class MedicosController {
   constructor(
     private readonly medicosService:
       MedicosService,
   ) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.PACIENTE, RolUsuario.ADMINISTRADOR)
+  @ValidatedResponse(MedicoConsultaDto, true)
+  listarDisponibles() {
+    return this.medicosService.listarDisponibles();
+  }
 
   @Patch(':id/valor-consulta')
   @UseGuards(
@@ -46,6 +60,7 @@ export class MedicosController {
   @Roles(
     RolUsuario.ADMINISTRADOR,
   )
+  @ValidatedResponse(MedicoConsultaDto)
   actualizarValorConsulta(
     @Param(
       'id',

@@ -1,0 +1,53 @@
+<main class="area-page clinic-area">
+  <div class="area-ambient" aria-hidden="true"><span></span><span></span></div>
+  <div class="area-container">
+    <header class="area-header">
+      <a class="area-brand" [routerLink]="auth.rutaInicio()"
+        ><img src="marca-clinica.svg" width="30" height="30" alt="" /> CLÍNICA</a
+      >
+      @if (auth.sesion(); as sesion) {
+        <div class="session-details">
+          <span>{{ sesion.usuario.nombres }} {{ sesion.usuario.apellidos }}</span>
+          <span class="role-badge">{{ etiquetas[sesion.usuario.rol] }}</span>
+          <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+        </div>
+      }
+    </header>
+    @if (auth.sesion()?.usuario?.rol === 'PACIENTE') {
+      <nav class="patient-nav" aria-label="Secciones del paciente">
+        <a
+          routerLink="/paciente"
+          routerLinkActive="current"
+          [routerLinkActiveOptions]="{ exact: true }"
+          ariaCurrentWhenActive="page"
+          ><svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="4" y="5" width="16" height="16" rx="3" />
+            <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" /></svg
+          >Mis turnos</a
+        >
+        <a routerLink="/paciente/reservar" routerLinkActive="current" ariaCurrentWhenActive="page"
+          ><svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8 12h8m-4-4v8" /></svg
+          >Reservar consulta</a
+        >
+        <span>Tu espacio de salud</span>
+      </nav>
+    } @else {
+      <div class="workspace-strip">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="16" rx="3" />
+          <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" />
+        </svg>
+        <strong>{{
+          auth.sesion()?.usuario?.rol === 'MEDICO' ? 'Agenda médica' : 'Administración'
+        }}</strong
+        ><span>Un espacio para organizar la atención</span>
+      </div>
+    }
+    <section class="area-content"><router-outlet /></section>
+    <footer class="area-footer">
+      <span>CLÍNICA · Un espacio para cuidar</span><span>Turnos · Agenda · Gestión</span>
+    </footer>
+  </div>
+</main>

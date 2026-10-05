@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsInt,
   IsPositive,
@@ -6,5 +7,6 @@ import {
 export class ActualizarValorConsultaDto {
   @IsInt()
   @IsPositive()
+  @ApiProperty()
   valorConsulta: number;
 }

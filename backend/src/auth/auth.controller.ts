@@ -1,3 +1,6 @@
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { SesionRespuestaDto } from '../common/response-dtos';
+import { ValidatedResponse } from '../common/validate-response';
 import {
   Body,
   Controller,
@@ -32,6 +35,7 @@ import {
   RolUsuario,
 } from '../common/enums/rol-usuario.enum';
 
+@ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -40,12 +44,14 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ValidatedResponse(SesionRespuestaDto)
   login(
     @Body() loginDto: LoginDto,
   ) {
     return this.authService.login(loginDto);
   }
 
+  @ApiBearerAuth()
   @Get('protegido')
   @UseGuards(JwtAuthGuard)
   rutaProtegida() {
@@ -55,6 +61,7 @@ export class AuthController {
     };
   }
 
+  @ApiBearerAuth()
   @Get('admin')
   @UseGuards(
     JwtAuthGuard,

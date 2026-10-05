@@ -1,3 +1,6 @@
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ReservaRespuestaDto } from '../common/response-dtos';
+import { ValidatedResponse } from '../common/validate-response';
 import {
   Body,
   Controller,
@@ -25,6 +28,8 @@ import { Roles } from '../common/decorators/roles.decorator';
 
 import { RolUsuario } from '../common/enums/rol-usuario.enum';
 
+@ApiTags('Turnos')
+@ApiBearerAuth()
 @Controller('reservas')
 export class ReservasController {
   constructor(
@@ -41,6 +46,7 @@ export class ReservasController {
     RolUsuario.PACIENTE,
     RolUsuario.ADMINISTRADOR,
   )
+  @ValidatedResponse(ReservaRespuestaDto, false, 201)
   crear(
     @Body()
     dto: CrearReservaDto,
@@ -67,6 +73,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.PACIENTE,
   )
+  @ValidatedResponse(ReservaRespuestaDto, true)
   listarMisTurnos(
     @Req()
     request: {
@@ -89,6 +96,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.MEDICO,
   )
+  @ValidatedResponse(ReservaRespuestaDto, true)
   listarTurnosMedico(
     @Query()
     query: ListarTurnosMedicoDto,
@@ -115,6 +123,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.ADMINISTRADOR,
   )
+  @ValidatedResponse(ReservaRespuestaDto, true)
   listarTurnosAdministrador() {
     return this.reservasService.listarTurnosAdministrador();
   }
@@ -127,6 +136,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.PACIENTE,
   )
+  @ValidatedResponse(ReservaRespuestaDto, false)
   cancelar(
     @Param(
       'id',
@@ -156,6 +166,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.ADMINISTRADOR,
   )
+  @ValidatedResponse(ReservaRespuestaDto, false)
   cancelarAdministrador(
     @Param(
       'id',
@@ -176,6 +187,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.MEDICO,
   )
+  @ValidatedResponse(ReservaRespuestaDto, false)
   marcarAtendido(
     @Param(
       'id',
@@ -205,6 +217,7 @@ export class ReservasController {
   @Roles(
     RolUsuario.MEDICO,
   )
+  @ValidatedResponse(ReservaRespuestaDto, false)
   marcarAusente(
     @Param(
       'id',

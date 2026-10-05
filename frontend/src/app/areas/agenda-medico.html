@@ -1,0 +1,218 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">TU ESPACIO DE ATENCIÓN</p>
+    <h1>Mi agenda<span>.</span></h1>
+    <p class="description">
+      Cada consulta, en su lugar. Organizá tu día y registrá la atención de tus pacientes.
+    </p>
+  </div>
+  <span class="heading-tag">ÁREA MÉDICA</span>
+</div>
+@if (!cargando() && !error()) {
+  <section class="overview-grid" aria-label="Resumen de la fecha consultada">
+    <article class="overview-card">
+      <span class="overview-icon"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="16" rx="3" />
+          <path d="M8 3v4m8-4v4M4 11h16m-10 5h4" /></svg
+      ></span>
+      <div>
+        <span>Consultas reservadas</span><strong>{{ resumen().reservados }}</strong>
+      </div>
+    </article>
+    <article class="overview-card">
+      <span class="overview-icon blue"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m8 12 3 3 5-6" /></svg
+      ></span>
+      <div>
+        <span>Pacientes atendidos</span><strong>{{ resumen().atendidos }}</strong>
+      </div>
+    </article>
+    <article class="overview-card">
+      <span class="overview-icon rose"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="m9 9 6 6m0-6-6 6" /></svg
+      ></span>
+      <div>
+        <span>Ausencias registradas</span><strong>{{ resumen().ausentes }}</strong>
+      </div>
+    </article>
+  </section>
+}
+<section class="agenda-banner" aria-labelledby="agenda-titulo">
+  <div>
+    <span class="eyebrow">UN DÍA A LA VEZ</span>
+    <h2 id="agenda-titulo">Tu agenda, más clara.</h2>
+    <p>Consultá una fecha para ver sus turnos y actualizar el resultado de cada atención.</p>
+  </div>
+  <form class="toolbar" (ngSubmit)="cargar()">
+    <label for="fecha-agenda"
+      >Fecha de consulta<input
+        id="fecha-agenda"
+        name="fecha"
+        type="date"
+        [(ngModel)]="fecha"
+        required
+        [disabled]="cargando() || guardando()" /></label
+    ><button type="submit" [disabled]="cargando() || guardando()">
+      Consultar agenda <span aria-hidden="true">→</span>
+    </button>
+  </form>
+</section>
+<div class="section-heading">
+  <div>
+    <h2>Consultas del {{ fechaConsultada() | date: 'dd/MM/yyyy' }}</h2>
+    <p>Horarios de Argentina · Atención de una hora</p>
+  </div>
+  <span class="heading-tag">PACIENTES DEL DÍA</span>
+</div>
+@if (error()) {
+  <p class="message error" role="alert">{{ error() }}</p>
+}
+@if (mensaje()) {
+  <p class="message success" role="status">{{ mensaje() }}</p>
+}
+@if (seleccion(); as seleccionada) {
+  <section #confirmacion class="confirmation" tabindex="-1" aria-label="Confirmar estado">
+    <div>
+      <span class="eyebrow">REVISÁ ANTES DE CONFIRMAR</span>
+      <h2>¿Marcar como {{ seleccionada.accion }}?</h2>
+      <p>
+        {{ seleccionada.turno.paciente.nombres }} {{ seleccionada.turno.paciente.apellidos }} ·
+        {{ seleccionada.turno.fechaHora | date: 'HH:mm' : '-0300' }} hs.
+      </p>
+    </div>
+    <div class="actions">
+      <button type="button" (click)="confirmar()" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando…' : 'Confirmar' }}</button
+      ><button
+        type="button"
+        class="secondary"
+        (click)="seleccion.set(null)"
+        [disabled]="guardando()"
+      >
+        Volver
+      </button>
+    </div>
+  </section>
+}
+@if (cargando()) {
+  <p class="message loading" role="status">Cargando agenda…</p>
+} @else if (!error() && !turnos().length) {
+  <div class="message empty-state">
+    <span aria-hidden="true">○</span>
+    <h2>Un día sin turnos reservados.</h2>
+    <p>No tenés turnos para esta fecha. Podés consultar otro día desde tu agenda.</p>
+  </div>
+} @else if (turnos().length) {
+  <div class="table-container">
+    <table>
+      <caption class="sr-only">
+        Turnos de la fecha seleccionada
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Paciente</th>
+          <th scope="col">Horario</th>
+          <th scope="col">Valor reservado</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Registrar atención</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (turno of turnos(); track turno.id) {
+          <tr [attr.data-turno-id]="turno.id">
+            <td class="identity-cell" data-label="Paciente">
+              <div class="person">
+                <span class="avatar" aria-hidden="true"
+                  >{{ turno.paciente.nombres.slice(0, 1)
+                  }}{{ turno.paciente.apellidos.slice(0, 1) }}</span
+                >
+                <div>
+                  <strong>{{ turno.paciente.nombres }} {{ turno.paciente.apellidos }}</strong
+                  ><small>DNI {{ turno.paciente.documento }}</small>
+                </div>
+              </div>
+            </td>
+            <td data-label="Horario">
+              <strong>{{ turno.fechaHora | date: 'HH:mm' : '-0300' }} hs</strong>
+            </td>
+            <td class="value-cell" data-label="Valor reservado">
+              {{ turno.valorConsulta | currency: 'ARS' : 'code' : '1.0-0' }}
+            </td>
+            <td>
+              <span
+                class="badge"
+                [class.reserved]="turno.estado === 'ACTIVO'"
+                [class.attended]="turno.estado === 'ATENDIDO'"
+                [class.absent]="turno.estado === 'AUSENTE'"
+                ><span aria-hidden="true"></span
+                >{{
+                  turno.estado === 'ACTIVO'
+                    ? 'Reservado'
+                    : turno.estado === 'ATENDIDO'
+                      ? 'Atendido'
+                      : 'Ausente'
+                }}</span
+              >
+            </td>
+            <td class="action-cell">
+              @if (turno.estado === 'ACTIVO') {
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="small-button"
+                    (click)="seleccionarEstado(turno, 'atendido')"
+                    [disabled]="guardando()"
+                    [attr.aria-label]="
+                      'Marcar atendido a ' + turno.paciente.nombres + ' ' + turno.paciente.apellidos
+                    "
+                  >
+                    Atendido</button
+                  ><button
+                    type="button"
+                    class="secondary small-button"
+                    (click)="seleccionarEstado(turno, 'ausente')"
+                    [disabled]="guardando()"
+                    [attr.aria-label]="
+                      'Marcar ausente a ' + turno.paciente.nombres + ' ' + turno.paciente.apellidos
+                    "
+                  >
+                    Ausente
+                  </button>
+                </div>
+              } @else {
+                <span class="muted">Registrado</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+<section class="guidance-grid" aria-label="Información para registrar atenciones">
+  <article class="guidance-card">
+    <span>01</span>
+    <div>
+      <h3>Una atención, un registro.</h3>
+      <p>
+        Marcá el turno como atendido o ausente según lo ocurrido. Revisá al paciente antes de
+        confirmar.
+      </p>
+    </div>
+  </article>
+  <article class="guidance-card">
+    <span>02</span>
+    <div>
+      <h3>Tu agenda, por fecha.</h3>
+      <p>
+        El resumen corresponde al día consultado. Los turnos cancelados no forman parte de tu
+        agenda.
+      </p>
+    </div>
+  </article>
+</section>

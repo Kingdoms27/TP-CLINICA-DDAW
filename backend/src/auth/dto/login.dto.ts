@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -11,11 +12,13 @@ export class LoginDto {
   @IsNotEmpty({
     message: 'El email es obligatorio',
   })
+  @ApiProperty()
   email: string;
 
   @IsString()
   @IsNotEmpty({
     message: 'La contraseña es obligatoria',
   })
+  @ApiProperty()
   clave: string;
 }

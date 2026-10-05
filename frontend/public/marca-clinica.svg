@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="lavanda" x1="12" y1="8" x2="53" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3EFFF"/>
+      <stop offset=".5" stop-color="#C2B2E7"/>
+      <stop offset="1" stop-color="#94ACD5"/>
+    </linearGradient>
+  </defs>
+  <g fill="url(#lavanda)">
+    <path d="M32 28C23 23 21 17 25 12C28 8 36 8 39 12C43 17 41 23 32 28Z"/>
+    <path d="M36 32C41 23 47 21 52 25C56 28 56 36 52 39C47 43 41 41 36 32Z"/>
+    <path d="M32 36C41 41 43 47 39 52C36 56 28 56 25 52C21 47 23 41 32 36Z"/>
+    <path d="M28 32C23 41 17 43 12 39C8 36 8 28 12 25C17 21 23 23 28 32Z"/>
+  </g>
+  <path d="m32 27 5 5-5 5-5-5Z" fill="#EDE7FC"/>
+</svg>

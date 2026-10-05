@@ -67,7 +67,7 @@ import {
           ),
 
         signOptions: {
-          expiresIn: '8h',
+          expiresIn: configService.get<number>('JWT_EXPIRES_IN_SECONDS') ? Number(configService.get<number>('JWT_EXPIRES_IN_SECONDS')) : 28800,
         },
       }),
     }),

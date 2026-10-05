@@ -18,6 +18,8 @@ import {
 import {
   ActualizarValorConsultaDto,
 } from './dto/actualizar-valor-consulta.dto';
+import { EstadoUsuario } from '../common/enums/estado-usuario.enum';
+import { RolUsuario } from '../common/enums/rol-usuario.enum';
 
 @Injectable()
 export class MedicosService {
@@ -26,6 +28,21 @@ export class MedicosService {
     private readonly medicoRepository:
       Repository<Medico>,
   ) {}
+
+  async listarDisponibles() {
+    const medicos = await this.medicoRepository.find({
+      where: { usuario: { estado: EstadoUsuario.ACTIVO, rol: RolUsuario.MEDICO } },
+      relations: { usuario: true },
+      order: { usuario: { apellidos: 'ASC', nombres: 'ASC' } },
+    });
+    return medicos.map((medico) => ({
+      id: medico.id,
+      matricula: medico.matricula,
+      valorConsulta: medico.valorConsulta,
+      nombres: medico.usuario.nombres,
+      apellidos: medico.usuario.apellidos,
+    }));
+  }
 
   async actualizarValorConsulta(
     idMedico: number,
@@ -57,28 +74,11 @@ export class MedicosService {
       );
 
     return {
-      id:
-        medicoActualizado.id,
-
-      matricula:
-        medicoActualizado.matricula,
-
-      valorConsulta:
-        medicoActualizado.valorConsulta,
-
-      usuario: {
-        id:
-          medico.usuario.id,
-
-        nombres:
-          medico.usuario.nombres,
-
-        apellidos:
-          medico.usuario.apellidos,
-
-        email:
-          medico.usuario.email,
-      },
+      id: medicoActualizado.id,
+      matricula: medicoActualizado.matricula,
+      valorConsulta: medicoActualizado.valorConsulta,
+      nombres: medico.usuario.nombres,
+      apellidos: medico.usuario.apellidos,
     };
   }
 }
