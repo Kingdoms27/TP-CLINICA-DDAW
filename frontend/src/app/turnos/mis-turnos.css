@@ -15,4 +15,14 @@ tbody tr:last-child td { border-bottom: 0; }
 .secondary { display: block; font-size: 12px; color: #77766f; margin-top: 6px; }
 .state { display: inline-block; padding: 6px 10px; background: #171a1f08; border-radius: 20px; font-size: 12px; }
 .active { background: #d2e6d8; color: #255b3a; }
+.heading-actions, .confirmation-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.primary { display: inline-block; padding: 12px 18px; border-radius: 10px; background: #d2e6d8; color: #255b3a; font-size: 13px; font-weight: 600; }
+.policy { color: #77766f; font-size: 12px; margin: -12px 0 26px; line-height: 1.7; }
+.cancel-confirm { padding: 24px; border: 1px solid #962c2c30; border-radius: 16px; margin-bottom: 24px; background: #ffffff60; }
+.cancel-confirm h2 { font-size: 20px; margin-bottom: 10px; }
+.cancel-confirm p { font-size: 14px; line-height: 1.7; margin-bottom: 18px; }
+.danger { background: #962c2c; } .cancel-button { background: #962c2c0d; color: #962c2c; padding: 8px 12px; }
+.success { color: #255b3a; background: #e1ebe2; }
+.message { margin-bottom: 24px; }
+@media (max-width: 700px) { .heading-row { align-items: flex-start; flex-direction: column; } }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

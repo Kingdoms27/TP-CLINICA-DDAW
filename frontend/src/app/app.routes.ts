@@ -14,7 +14,10 @@ export const routes: Routes = [
     component: Area,
     canActivate: [authGuard],
     data: { rol: 'PACIENTE' },
-    children: [{ path: '', loadComponent: () => import('./turnos/mis-turnos').then((m) => m.MisTurnos) }],
+    children: [
+      { path: '', loadComponent: () => import('./turnos/mis-turnos').then((m) => m.MisTurnos) },
+      { path: 'reservar', loadComponent: () => import('./turnos/reservar-turno').then((m) => m.ReservarTurno) },
+    ],
   },
   ...(['MEDICO', 'ADMINISTRADOR'] as const).map((rol) => ({
     path: rol === 'MEDICO' ? 'medico' : 'administrador',

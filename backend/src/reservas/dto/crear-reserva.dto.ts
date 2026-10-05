@@ -10,7 +10,7 @@ export class CrearReservaDto {
   @IsPositive()
   idMedico: number;
 
-  @IsISO8601()
+  @IsISO8601({ strict: true, strictSeparator: true })
   fechaHora: string;
 
   @IsOptional()

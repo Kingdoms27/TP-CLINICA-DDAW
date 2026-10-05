@@ -105,12 +105,17 @@ export class ReservasService {
         where: {
           id: dto.idMedico,
         },
+        relations: { usuario: true },
       });
 
     if (!medico) {
       throw new NotFoundException(
         'Médico no encontrado',
       );
+    }
+
+    if (medico.usuario.estado !== EstadoUsuario.ACTIVO || medico.usuario.rol !== RolUsuario.MEDICO) {
+      throw new BadRequestException('El médico no está disponible para reservar turnos');
     }
 
     const fechaHora =
@@ -165,7 +170,8 @@ export class ReservasService {
       hora < 8 ||
       hora >= 16 ||
       minutos !== 0 ||
-      segundos !== 0
+      segundos !== 0 ||
+      fechaHora.getMilliseconds() !== 0
     ) {
       throw new BadRequestException(
         'Los turnos deben comenzar en hora exacta entre las 08:00 y las 15:00',

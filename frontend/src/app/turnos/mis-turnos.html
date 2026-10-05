@@ -1,8 +1,24 @@
 <div class="heading-row">
   <div><p class="eyebrow">ÁREA PACIENTE</p><h1>Mis turnos</h1></div>
-  <button type="button" (click)="cargar()" [disabled]="cargando()">Actualizar</button>
+  <div class="heading-actions">
+    <button type="button" (click)="cargar()" [disabled]="cargando() || cancelando()">Actualizar</button>
+    <a class="primary" routerLink="/paciente/reservar">Reservar turno</a>
+  </div>
 </div>
 <p class="description">Consultá tus reservas y el valor de cada consulta al momento de reservar.</p>
+<p class="policy">Podés cancelar un turno reservado hasta el día anterior a la consulta.</p>
+@if (mensaje()) {<p class="message success" role="status">{{ mensaje() }}</p>}
+@if (errorCancelacion()) {<p class="message error" role="alert">{{ errorCancelacion() }}</p>}
+@if (seleccion(); as turno) {
+  <section class="cancel-confirm" aria-label="Confirmar cancelación">
+    <h2>¿Cancelar este turno?</h2>
+    <p>{{ turno.medico.nombres }} {{ turno.medico.apellidos }} · {{ turno.fechaHora | date:'dd/MM/yyyy HH:mm':'-0300' }} hs.</p>
+    <div class="confirmation-actions">
+      <button type="button" class="danger" (click)="confirmarCancelacion()" [disabled]="cancelando()">{{ cancelando() ? 'Cancelando…' : 'Sí, cancelar turno' }}</button>
+      <button type="button" (click)="seleccion.set(null)" [disabled]="cancelando()">Conservar turno</button>
+    </div>
+  </section>
+}
 @if (cargando()) {
   <p class="message" role="status">Cargando tus turnos…</p>
 } @else if (error()) {
@@ -13,14 +29,15 @@
   <div class="table-container">
     <table>
       <caption class="sr-only">Listado de tus turnos</caption>
-      <thead><tr><th scope="col">Fecha y hora</th><th scope="col">Médico</th><th scope="col">Consulta</th><th scope="col">Estado</th></tr></thead>
+      <thead><tr><th scope="col">Fecha y hora</th><th scope="col">Médico</th><th scope="col">Consulta</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
       <tbody>
         @for (turno of turnos(); track turno.id) {
           <tr>
-            <td>{{ turno.fechaHora | date:'dd/MM/yyyy' }}<span class="secondary">{{ turno.fechaHora | date:'HH:mm' }} hs</span></td>
+            <td>{{ turno.fechaHora | date:'dd/MM/yyyy':'-0300' }}<span class="secondary">{{ turno.fechaHora | date:'HH:mm':'-0300' }} hs</span></td>
             <td>{{ turno.medico.nombres }} {{ turno.medico.apellidos }}<span class="secondary">Matrícula {{ turno.medico.matricula }}</span></td>
             <td>{{ turno.valorConsulta | currency:'ARS':'code':'1.0-0' }}</td>
             <td><span class="state" [class.active]="turno.estado === 'ACTIVO'">{{ estados[turno.estado] }}</span></td>
+            <td>@if (puedeCancelar(turno)) {<button type="button" class="cancel-button" (click)="solicitarCancelacion(turno)" [disabled]="cancelando()">Cancelar</button>} @else {<span class="secondary">—</span>}</td>
           </tr>
         }
       </tbody>

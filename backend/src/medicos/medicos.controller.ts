@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
@@ -37,6 +38,13 @@ export class MedicosController {
     private readonly medicosService:
       MedicosService,
   ) {}
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RolUsuario.PACIENTE, RolUsuario.ADMINISTRADOR)
+  listarDisponibles() {
+    return this.medicosService.listarDisponibles();
+  }
 
   @Patch(':id/valor-consulta')
   @UseGuards(
