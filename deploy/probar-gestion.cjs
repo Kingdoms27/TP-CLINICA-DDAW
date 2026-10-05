@@ -61,8 +61,15 @@ async function abrir(browser, sesion, width, height, reducir = false) {
           if (nombre === 'escritorio' || nombre === 'movil') await page.screenshot({path: join(previews, `admin-reservar-${nombre}.png`), fullPage: true});
           await page.getByRole('button', {name: 'Valores de consulta', exact: true}).click();
           await page.locator('.price-input').first().waitFor();
+          await page.waitForTimeout(750);
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-          if (nombre === 'escritorio' || nombre === 'movil') await page.screenshot({path: join(previews, `admin-precios-${nombre}.png`), fullPage: true});
+          await page.locator('tbody tr').last().scrollIntoViewIfNeeded();
+          await page.waitForTimeout(400);
+          assert.ok(await page.locator('tbody tr').last().evaluate(el => Number(getComputedStyle(el).opacity) > .95), `${nombre}: precios visibles al desplazarse`);
+          if (nombre === 'escritorio' || nombre === 'movil') {
+            await page.emulateMedia({reducedMotion: 'reduce'});
+            await page.screenshot({path: join(previews, `admin-precios-${nombre}.png`), fullPage: true});
+          }
         }
         assert.deepEqual(errors, [], `${rol}/${nombre}: errores del navegador`);
         console.log(`${rol} aprobado en ${nombre}: ${width}×${height}, presentación, tarjetas, scroll y secciones. Los listados de presentación usan datos simulados.`);

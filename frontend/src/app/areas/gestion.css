@@ -65,7 +65,6 @@ td strong { font-weight: 500; }
 small { display: block; font-size: 10px; color: #85798f; margin-top: 6px; font-weight: 400; }
 tbody tr:last-child td { border-bottom: 0; }
 tbody tr:hover { background: #fff5; }
-.person { display: flex; align-items: center; gap: 10px; }
 .value-cell { white-space: nowrap; font-weight: 500; }
 .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid #92859d12; border-radius: 20px; background: #e8e4ed; color: #807588; font-size: 9px; white-space: nowrap; }
 .badge > span { width: 4px; height: 4px; background: currentColor; opacity: .65; border-radius: 50%; }
