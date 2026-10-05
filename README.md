@@ -1,56 +1,143 @@
-# TP CLÍNICA DDAW
+# Clínica — Sistema de gestión de turnos
 
-Sistema de gestión de turnos con NestJS, TypeORM, PostgreSQL, Angular, nginx y PM2.
+**Trabajo Práctico de Desarrollo de Aplicaciones Web · Grupo K**
 
-## Funcionalidades
+## Introducción
 
-| Rol | Operaciones |
+Aplicación web para administrar los turnos de una clínica, desarrollada a partir de la consigna del trabajo práctico. El sistema permite que los pacientes reserven sus consultas, que los médicos organicen su agenda y registren la atención, y que el administrador gestione las reservas y los valores de consulta.
+
+La solución integra una interfaz en Angular, una API en NestJS y una base de datos PostgreSQL mediante TypeORM. Incluye autenticación, permisos por rol, validación de datos, documentación técnica y configuración de despliegue con nginx y PM2.
+
+## Integrantes
+
+**Grupo K**
+
+- Kevin Berthet.
+
+## Funcionalidades por rol
+
+| Rol | Funcionalidades |
 | --- | --- |
-| Paciente | Iniciar sesión, reservar, ver sus turnos y cancelar hasta el día anterior. |
-| Médico | Consultar agenda por fecha y marcar atendido o ausente. |
-| Administrador | Consultar y filtrar turnos, reservar para pacientes, cancelar antes del inicio y modificar valores de consulta. |
+| Paciente | Iniciar sesión, consultar médicos y horarios disponibles, reservar un turno, visualizar sus reservas y cancelar hasta el día anterior a la consulta. |
+| Médico | Consultar su agenda por fecha, visualizar los datos del paciente y registrar un turno como atendido o ausente. |
+| Administrador | Consultar y filtrar reservas por fecha y paciente, reservar para pacientes existentes, cancelar antes del inicio del turno y modificar el valor de consulta de los médicos. |
 
-Solo los usuarios activos pueden ingresar. El JWT y el rol protegen las rutas y la API. La baja de usuario o cambio de rol invalida la sesión previa. Las consultas duran una hora, con inicios de 08:00 a 15:00, hasta 30 días de anticipación. El precio queda congelado al reservar. Un índice único de PostgreSQL impide dos reservas no canceladas para el mismo médico y horario; las actualizaciones de estado comprueban que el turno sigue activo.
+Cada rol cuenta con su propia pantalla y sus operaciones autorizadas. La interfaz se adapta a computadoras y dispositivos móviles e incorpora confirmaciones, mensajes de validación y estados de carga.
 
-La gestión de usuarios/roles y obras sociales queda fuera del alcance del TP. El administrador consulta pacientes activos existentes.
+## Reglas de funcionamiento
 
-## Desarrollo en Windows / PowerShell
+- Solo pueden ingresar usuarios activos con credenciales válidas.
+- Las consultas duran una hora, dentro de la franja de atención de 08:00 a 16:00. Los horarios de inicio van de 08:00 a 15:00.
+- Se pueden reservar turnos con hasta 30 días de anticipación.
+- Un médico no puede tener dos reservas vigentes para el mismo día y horario. La base de datos también controla esta restricción.
+- El valor de consulta se conserva al momento de reservar. Un cambio posterior de precio no modifica reservas existentes.
+- Los turnos pueden estar activos, atendidos, ausentes o cancelados.
+- La cancelación respeta los plazos correspondientes a cada rol y solo se aplica sobre turnos activos.
+- Los horarios se interpretan en la zona `America/Argentina/Buenos_Aires`.
 
-Con PostgreSQL funcionando y la base `clinica` creada, abrir dos terminales desde la raíz.
+La gestión de altas, bajas y roles de usuarios queda fuera del alcance de esta etapa, según la consigna. El sistema utiliza usuarios existentes y no contempla la gestión de obras sociales.
 
-**Backend:**
+## Modelo de datos
+
+| Entidad | Información principal |
+| --- | --- |
+| Usuarios | Documento, apellidos, nombres, correo, contraseña protegida, estado y rol. |
+| Médicos | Usuario asociado, matrícula y valor de consulta. |
+| Reservas | Médico, paciente, fecha y hora, estado y valor de consulta registrado al reservar. |
+
+Cada médico se vincula con un usuario. Las reservas relacionan al médico con el usuario paciente y permiten conservar el historial de las consultas.
+
+## Tecnologías y requisitos de la consigna
+
+| Requisito | Implementación |
+| --- | --- |
+| Backend con NestJS | API organizada en módulos, controladores y servicios para autenticación, usuarios, médicos y reservas. |
+| Persistencia con TypeORM y PostgreSQL | Entidades, relaciones, consultas y control de reservas duplicadas en la base de datos. |
+| Frontend con Angular | Inicio de sesión y vistas de paciente, médico y administrador, con rutas protegidas. |
+| Validación de entradas y salidas | DTOs y validaciones mediante `class-validator` y `class-transformer`, aplicadas a solicitudes y respuestas de la API. |
+| Configuración del entorno | Variables del backend en `.env` y proxy de desarrollo de Angular para utilizar rutas relativas a `/api/`. |
+| Documentación | Swagger para la API y Compodoc para los componentes, servicios y rutas del frontend. |
+| Despliegue con nginx y PM2 | nginx sirve el frontend y redirige las solicitudes a la API; PM2 administra el proceso del backend. |
+
+La autenticación utiliza JWT y las contraseñas se almacenan mediante bcrypt. La API verifica el estado del usuario y su rol en las solicitudes protegidas; una baja o un cambio de rol invalida el acceso con la sesión anterior.
+
+## Instalación y ejecución en desarrollo
+
+Se requiere Node.js compatible con las versiones del proyecto, npm y PostgreSQL en funcionamiento. Crear previamente la base de datos `clinica`. Los siguientes comandos se ejecutan desde la raíz del repositorio en PowerShell.
+
+Instalar las dependencias:
 
 ```powershell
-cd backend
-npm ci
-# Solo si no existe .env:
-Copy-Item .env.example .env
-# Completar DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE y JWT_SECRET.
-npm run start:dev
+npm ci --prefix backend
+npm ci --prefix frontend
 ```
 
-Conservar `.env` si ya existe. Se usa zona Argentina por defecto. `DB_SYNCHRONIZE=true` actualiza el esquema en desarrollo; el modo producción lo desactiva. Si la configuración tiene una zona diferente, usar `TZ=America/Argentina/Buenos_Aires` para coincidir con los horarios de la clínica. `JWT_EXPIRES_IN_SECONDS` configura la duración del token; por defecto son ocho horas.
-
-**Frontend:**
+Crear `backend/.env` a partir del archivo de ejemplo, únicamente si todavía no existe:
 
 ```powershell
-cd frontend
-npm ci
-npm start
+if (-not (Test-Path backend/.env)) {
+    Copy-Item backend/.env.example backend/.env
+}
 ```
 
-Abrir http://localhost:4200. El proxy de Angular reenvía `/api/` a NestJS en 3000 y elimina ese prefijo. Si se cambia PORT, ajustar `frontend/proxy.conf.json`.
+Completar `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` y `JWT_SECRET` con la configuración local. El archivo `.env` no se incluye en el repositorio. En desarrollo, `DB_SYNCHRONIZE=true` permite actualizar el esquema; en producción se desactiva. La duración del token se configura mediante `JWT_EXPIRES_IN_SECONDS`, con ocho horas como valor predeterminado.
 
-**Usuarios de prueba:** dentro de backend, `npm run seed`. Clave inicial `Clinica123!`; correos `paciente1@clinica.com`, `medico1@clinica.com`, `admin@clinica.com`. El seed crea solo usuarios inexistentes y no restablece claves.
+Iniciar el backend en una terminal:
 
-## Verificación, documentación y despliegue
+```powershell
+npm run start:dev --prefix backend
+```
 
-- [Pruebas por rol, comandos, Swagger, Compodoc y guion del video](docs/PRUEBAS_Y_ENTREGA.md).
-- [nginx + PM2 en Windows y Linux](docs/DESPLIEGUE.md).
-- Swagger directo: http://localhost:3000/docs.
-- Compodoc: `npm run docs --prefix frontend`, luego `npm run docs:serve --prefix frontend`; http://localhost:8081.
-- nginx + PM2: http://localhost:8080, después de seguir la guía.
+Iniciar el frontend en otra terminal:
 
-Las entradas y salidas de la API se validan mediante DTOs. Swagger documenta cuerpos, respuestas y autenticación. Compodoc documenta componentes, servicios y rutas de Angular. GitHub Actions incluye pruebas e2e con PostgreSQL 18 en una base independiente.
+```powershell
+npm start --prefix frontend
+```
 
-El video de 8–12 minutos, la participación con cámara y micrófono de todos los integrantes y la entrega del ZIP/enlace en el campus deben realizarse por el equipo. Antes de integrar a main, comprobar el resultado de Actions y las operaciones de los tres roles en el entorno del equipo.
+Acceder a [http://localhost:4200](http://localhost:4200). El proxy de Angular envía las solicitudes de `/api/` al backend en el puerto 3000. Si se modifica el puerto del backend, ajustar `frontend/proxy.conf.json`.
+
+## Datos de prueba
+
+Con la base de datos configurada, cargar los usuarios de ejemplo:
+
+```powershell
+npm run seed --prefix backend
+```
+
+| Rol | Correo | Contraseña inicial |
+| --- | --- | --- |
+| Paciente | `paciente1@clinica.com` | `Clinica123!` |
+| Médico | `medico1@clinica.com` | `Clinica123!` |
+| Administrador | `admin@clinica.com` | `Clinica123!` |
+
+Estos datos se utilizan para pruebas locales. La carga crea los usuarios que no existen y no restablece las contraseñas de usuarios existentes.
+
+## Documentación y despliegue
+
+Swagger se encuentra en [http://localhost:3000/docs](http://localhost:3000/docs) durante el desarrollo. Documenta los endpoints, cuerpos de las solicitudes, respuestas y autenticación de la API.
+
+Para generar y consultar la documentación de Angular:
+
+```powershell
+npm run docs --prefix frontend
+npm run docs:serve --prefix frontend
+```
+
+Compodoc queda disponible en [http://localhost:8081](http://localhost:8081).
+
+La [guía de despliegue](docs/DESPLIEGUE.md) contiene la configuración y los comandos para ejecutar el sistema con nginx y PM2 en Windows y Linux. En ese entorno, la aplicación se sirve en [http://localhost:8080](http://localhost:8080), la API se accede mediante `/api/` y Swagger mediante `/docs/`.
+
+## Verificación del proyecto
+
+El repositorio incluye pruebas unitarias del backend, pruebas de integración con PostgreSQL y pruebas del frontend. GitHub Actions automatiza la ejecución de pruebas, compilaciones y verificaciones del despliegue.
+
+Para ejecutar las pruebas unitarias y compilar ambos proyectos:
+
+```powershell
+npm test --prefix backend -- --runInBand
+npm test --prefix frontend -- --watch=false
+npm run build --prefix backend
+npm run build --prefix frontend
+```
+
+Las pruebas de integración se ejecutan con `npm run test:e2e --prefix backend` y requieren la configuración de una base independiente de pruebas.
