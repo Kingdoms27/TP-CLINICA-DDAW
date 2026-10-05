@@ -50,6 +50,10 @@ export class Login {
     ).subscribe({
       next: () => {
         this.clave = '';
+        const ventana = this.document.defaultView;
+        if (ventana && (ventana.scrollY || ventana.scrollX)) {
+          ventana.scrollTo({top: 0, left: 0, behavior: 'instant'});
+        }
         void this.router.navigateByUrl(this.auth.rutaInicio());
       },
       error: (error: unknown) => this.error.set(mensajeApi(error, 'No se pudo iniciar sesión.')),

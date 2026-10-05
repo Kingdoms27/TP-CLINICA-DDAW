@@ -62,6 +62,7 @@ const previews = join(__dirname, 'runtime', 'previews');
     await page.locator('#clave').fill('Clinica123!');
     await page.getByRole('button', {name: 'Iniciar sesión'}).click();
     await page.waitForURL(url => url.pathname === '/paciente');
+    assert.equal(await page.evaluate(() => scrollY), 0, 'El área del paciente abre desde arriba después de usar el scroll del login.');
     await page.getByRole('button', {name: 'Cerrar sesión'}).click();
     await page.waitForURL('**/login');
     console.log('Movimiento reducido, error recuperable, ingreso real por nginx y cierre de sesión aprobados.');
