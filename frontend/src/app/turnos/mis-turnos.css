@@ -1,0 +1,18 @@
+.heading-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.eyebrow { font-size: 11px; letter-spacing: .15em; color: #77766f; margin-bottom: 14px; }
+h1 { font-size: clamp(32px, 4vw, 46px); letter-spacing: -.045em; }
+.description { color: #686965; font-size: 14px; line-height: 1.7; margin: 18px 0 32px; max-width: 650px; }
+button { background: #171a1f; color: #f1ede5; padding: 12px 18px; border-radius: 10px; cursor: pointer; font-size: 13px; }
+button:disabled { opacity: .5; cursor: wait; }
+.message { padding: 28px; background: #ffffff50; border: 1px solid #171a1f12; border-radius: 16px; font-size: 14px; line-height: 1.7; }
+.message h2 { font-size: 20px; margin-bottom: 6px; }
+.error { color: #962c2c; } .error button { margin-top: 16px; }
+.table-container { overflow-x: auto; border: 1px solid #171a1f12; border-radius: 16px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; min-width: 580px; }
+th { color: #77766f; font-weight: 600; background: #ffffff40; font-size: 12px; }
+th, td { padding: 20px; border-bottom: 1px solid #171a1f0c; }
+tbody tr:last-child td { border-bottom: 0; }
+.secondary { display: block; font-size: 12px; color: #77766f; margin-top: 6px; }
+.state { display: inline-block; padding: 6px 10px; background: #171a1f08; border-radius: 20px; font-size: 12px; }
+.active { background: #d2e6d8; color: #255b3a; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

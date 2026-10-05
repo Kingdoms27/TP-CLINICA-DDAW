@@ -1,19 +1,50 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize } from 'rxjs';
+import { AuthService } from '../auth.service';
+import { mensajeApi } from '../../shared/api-error';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly sesionVencida = inject(ActivatedRoute).snapshot.queryParamMap.get('sesion') === 'vencida';
+  readonly cargando = signal(false);
+  readonly error = signal('');
+  email = '';
+  clave = '';
   mostrarClave = false;
 
   alternarClave() {
     this.mostrarClave = !this.mostrarClave;
   }
 
-  iniciarSesion(event: Event) {
-    event.preventDefault();
+  iniciarSesion(form: NgForm) {
+    if (this.cargando()) return;
+    this.error.set('');
+    if (form.invalid) {
+      form.control.markAllAsTouched();
+      this.error.set('Ingresá un correo válido y tu contraseña.');
+      return;
+    }
+    this.cargando.set(true);
+    this.auth.login(this.email, this.clave).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.cargando.set(false)),
+    ).subscribe({
+      next: () => {
+        this.clave = '';
+        void this.router.navigateByUrl(this.auth.rutaInicio());
+      },
+      error: (error: unknown) => this.error.set(mensajeApi(error, 'No se pudo iniciar sesión.')),
+    });
   }
 }

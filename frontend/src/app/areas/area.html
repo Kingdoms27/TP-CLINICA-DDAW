@@ -1,0 +1,15 @@
+<main class="area-page">
+  <div class="area-container">
+    <header class="area-header">
+      <a class="area-brand" [routerLink]="auth.rutaInicio()">+ CLÍNICA</a>
+      @if (auth.sesion(); as sesion) {
+        <div class="session-details">
+          <span>{{ sesion.usuario.nombres }} {{ sesion.usuario.apellidos }}</span>
+          <span class="role-badge">{{ etiquetas[sesion.usuario.rol] }}</span>
+          <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+        </div>
+      }
+    </header>
+    <section class="area-content"><router-outlet /></section>
+  </div>
+</main>

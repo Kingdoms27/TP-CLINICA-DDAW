@@ -1,0 +1,11 @@
+:host { display: block; min-height: 100vh; }
+.area-page { min-height: 100vh; padding: 32px; background: radial-gradient(circle at 85% 0, #253240, #090d12 55%); }
+.area-container { max-width: 1180px; margin: auto; }
+.area-header { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 14px 0 34px; color: #f1ede5; }
+.area-brand { font-weight: 700; letter-spacing: .12em; white-space: nowrap; }
+.session-details { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+.role-badge { padding: 6px 12px; border: 1px solid #ffffff26; border-radius: 20px; color: #c9d5e1; }
+button { padding: 10px 16px; background: #ffffff12; border: 1px solid #ffffff26; border-radius: 10px; color: #f1ede5; cursor: pointer; }
+button:hover { background: #ffffff22; }
+.area-content { padding: clamp(22px, 4vw, 48px); border-radius: 26px; background: #f1ede5; min-height: 420px; box-shadow: 0 20px 70px #0003; }
+@media (max-width: 700px) { .area-page { padding: 18px; } .area-header { align-items: flex-start; flex-direction: column; } .session-details { flex-wrap: wrap; gap: 12px; } }

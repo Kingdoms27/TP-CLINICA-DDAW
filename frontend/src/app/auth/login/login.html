@@ -27,7 +27,8 @@
 
         <form
           class="login-form"
-          (submit)="iniciarSesion($event)"
+          #loginForm="ngForm"
+          (ngSubmit)="iniciarSesion(loginForm)"
         >
           <div class="form-group">
             <label for="email">
@@ -58,6 +59,10 @@
                 id="email"
                 name="email"
                 type="email"
+                [(ngModel)]="email"
+                required
+                email
+                [disabled]="cargando()"
                 autocomplete="email"
                 placeholder="nombre@correo.com"
               />
@@ -92,6 +97,9 @@
               <input
                 id="clave"
                 name="clave"
+                [(ngModel)]="clave"
+                required
+                [disabled]="cargando()"
                 [type]="mostrarClave ? 'text' : 'password'"
                 autocomplete="current-password"
                 placeholder="Ingresá tu contraseña"
@@ -101,6 +109,7 @@
                 class="password-toggle"
                 type="button"
                 (click)="alternarClave()"
+                [attr.aria-label]="mostrarClave ? 'Ocultar contraseña' : 'Mostrar contraseña'"
               >
                 @if (mostrarClave) {
                   <svg
@@ -143,12 +152,21 @@
             </div>
           </div>
 
+          @if (sesionVencida && !error()) {
+            <p class="login-message" role="status">Tu sesión venció. Volvé a iniciar sesión.</p>
+          }
+          @if (error()) {
+            <p class="login-message login-error" role="alert">{{ error() }}</p>
+          }
+
           <button
             class="submit-button"
             type="submit"
+            [disabled]="cargando()"
+            [attr.aria-busy]="cargando()"
           >
             <span>
-              Iniciar sesión
+              {{ cargando() ? 'Ingresando…' : 'Iniciar sesión' }}
             </span>
 
             <span class="submit-arrow">

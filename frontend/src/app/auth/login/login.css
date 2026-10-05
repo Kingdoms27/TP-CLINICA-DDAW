@@ -4,6 +4,10 @@
   min-height: 100vh;
 }
 
+.login-message { font-size: 13px; line-height: 1.6; color: #686965; }
+.login-error { color: #a32e2e; }
+.submit-button:disabled { opacity: .6; cursor: wait; transform: none; }
+
 .login-page {
   position: relative;
   display: flex;
