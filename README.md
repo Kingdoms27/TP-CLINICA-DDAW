@@ -1,18 +1,12 @@
 # Clínica — Sistema de gestión de turnos
 
-**Trabajo Práctico de Desarrollo de Aplicaciones Web · Grupo K**
+**Trabajo Final Integrador de Desarrollo de Aplicaciones Web 2026 · Grupo K**
 
 ## Introducción
 
 Aplicación web para administrar los turnos de una clínica, desarrollada a partir de la consigna del trabajo práctico. El sistema permite que los pacientes reserven sus consultas, que los médicos organicen su agenda y registren la atención, y que el administrador gestione las reservas y los valores de consulta.
 
 La solución integra una interfaz en Angular, una API en NestJS y una base de datos PostgreSQL mediante TypeORM. Incluye autenticación, permisos por rol, validación de datos, documentación técnica y configuración de despliegue con nginx y PM2.
-
-## Integrantes
-
-**Grupo K**
-
-- Kevin Berthet.
 
 ## Funcionalidades por rol
 
